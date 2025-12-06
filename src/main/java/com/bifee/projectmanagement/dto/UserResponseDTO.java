@@ -15,14 +15,14 @@ import java.time.LocalDateTime;
 public class UserResponseDTO {
     private Long id;
     private String email;
-    private String password;
+    private String name;
     private UserRole role;
     private LocalDateTime createdAt;
 
     public UserResponseDTO(User user) {
         this.id = user.getId();
         this.email = user.getEmail();
-        this.password = user.getPassword();
+        this.name = user.getName();
         this.role = user.getRole();
         this.createdAt = user.getCreatedAt();
     }

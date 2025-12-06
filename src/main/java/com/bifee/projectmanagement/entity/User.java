@@ -47,7 +47,7 @@ public class User {
 
     @UpdateTimestamp
     @Column(nullable = false)
-    private LocalDateTime UpdatedAt;
+    private LocalDateTime updatedAt;
 
     @NotNull(message = "isActive cannot be null")
     @Column(nullable = false)
