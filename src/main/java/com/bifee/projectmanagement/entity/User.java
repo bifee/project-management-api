@@ -1,56 +1,86 @@
 package com.bifee.projectmanagement.entity;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "users")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public record User(Long id,
+                   Email email,
+                   Password password,
+                   String name,
+                   UserRole role,
+                   LocalDateTime createdAt,
+                   LocalDateTime updatedAt,
+                   Boolean isActive) {
 
-    @NotNull(message = "Email cannot be null")
-    @Email(message = "Email must be valid")
-    @Column(nullable = false, unique = true)
-    private String email;
 
-    @NotNull(message = "Password cannot be null")
-    @Column(nullable = false)
-    private String password;
+    public static final class Builder {
+        private Long id;
+        private Email email;
+        private Password password;
+        private String name;
+        private UserRole role;
+        private LocalDateTime createdAt;
+        private LocalDateTime updatedAt;
+        private Boolean isActive;
 
-    @NotNull(message = "Name cannot be null")
-    @Column(nullable = false)
-    @Size(min = 3, max = 100, message = "Name must have between 3 e 100 characters")
-    private String name;
+        public static Builder builder() {
+            return new Builder();
+        }
 
-    @Enumerated(EnumType.STRING)
-    @NotNull(message = "Role cannot be null")
-    @Column(nullable = false)
-    private UserRole role;
+        public Builder copy(User source) {
+            this.id = source.id;
+            this.email = source.email;
+            this.password = source.password;
+            this.name = source.name;
+            this.role = source.role;
+            this.createdAt = source.createdAt;
+            this.updatedAt = source.updatedAt;
+            this.isActive = source.isActive;
+            return this;
+        }
 
-    @CreationTimestamp
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
+        public Builder withId(Long id) {
+            this.id = id;
+            return this;
+        }
 
-    @UpdateTimestamp
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
+        public Builder withEmail(Email email) {
+            this.email = email;
+            return this;
+        }
 
-    @NotNull(message = "isActive cannot be null")
-    @Column(nullable = false)
-    private Boolean isActive = true;
+        public Builder withPassword(Password password) {
+            this.password = password;
+            return this;
+        }
 
+        public Builder withName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder withRole(UserRole role) {
+            this.role = role;
+            return this;
+        }
+
+        public Builder withCreatedAt(LocalDateTime createdAt) {
+            this.createdAt = createdAt;
+            return this;
+        }
+
+        public Builder withUpdatedAt(LocalDateTime updatedAt) {
+            this.updatedAt = updatedAt;
+            return this;
+        }
+
+        public Builder withActive(Boolean isActive) {
+            this.isActive = isActive;
+            return this;
+        }
+
+        public User build() {
+            return new User(id, email, password, name, role, createdAt, updatedAt, isActive);
+        }
+
+    }
 }

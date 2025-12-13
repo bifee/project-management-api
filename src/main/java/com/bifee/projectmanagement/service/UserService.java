@@ -2,6 +2,7 @@ package com.bifee.projectmanagement.service;
 
 
 import com.bifee.projectmanagement.dto.UserRegisterDTO;
+import com.bifee.projectmanagement.entity.Password;
 import com.bifee.projectmanagement.entity.User;
 import com.bifee.projectmanagement.entity.UserRole;
 import com.bifee.projectmanagement.exception.UserAlreadyExistsException;
@@ -26,22 +27,18 @@ public class UserService {
 
     @Transactional
     public User register(UserRegisterDTO dto){
-        if(userRepository.existsByEmail(dto.getEmail())){
+        if(userRepository.existsByEmail(dto.email().value())){
             throw new UserAlreadyExistsException("Email already exists");
         }
-
-        User user = new User();
-        user.setEmail(dto.getEmail());
-        user.setName(dto.getName());
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        user.setRole(UserRole.DEV);
-        user.setIsActive(true);
+        Password password = new Password(passwordEncoder.encode(dto.password().value()));
+        User user = User.Builder.builder()
+                .withName(dto.name())
+                .withEmail(dto.email())
+                .withPassword(password)
+                .withRole(UserRole.DEV)
+                .withActive(true).build();
 
         return  userRepository.save(user);
-    }
-
-    public Optional<User> findByEmail(String email){
-        return userRepository.findByEmail(email);
     }
 
     public boolean validatePassword(String raw, String encoded){

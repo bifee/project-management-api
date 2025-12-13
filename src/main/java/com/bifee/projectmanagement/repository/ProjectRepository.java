@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ProjectRepository extends JpaRepository<Project, Long> {
+    boolean existsByNameIgnoreCase(String name);
+
+    Optional<Project> findByName(String name);
 
     Optional<Project> findByNameLikeIgnoreCase(String name);
 
