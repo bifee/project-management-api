@@ -109,6 +109,8 @@ public record Task (
             if (priority == null){
                 priority = TaskPriority.LOW;
             }
+            if (createdAt == null) createdAt = Instant.now();
+            if (updatedAt == null) updatedAt = Instant.now();
         }
 
     }

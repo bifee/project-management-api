@@ -46,7 +46,7 @@ class UserEntity {
         this.isActive = isActive;
     }
 
-    public static User toDomain(UserEntity userEntity){
+    protected static User toDomain(UserEntity userEntity){
         return new User.Builder()
                 .withId(userEntity.getId())
                 .withEmail(userEntity.getEmail())
@@ -59,7 +59,7 @@ class UserEntity {
                 .build();
     }
 
-    public static UserEntity toEntity(User user){
+    protected static UserEntity toEntity(User user){
         return new UserEntity(user.id(), user.name(), user.email(), user.password(), user.role(), user.createdAt(), user.updatedAt(), user.isActive());
     }
 

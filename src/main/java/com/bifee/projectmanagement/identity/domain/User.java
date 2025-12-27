@@ -80,7 +80,18 @@ public record User(Long id,
         }
 
         public User build() {
+            validate();
             return new User(id, email, password, name, role, createdAt, updatedAt, isActive);
+        }
+
+        private void validate() {
+            if (email == null) throw new IllegalArgumentException("Email cannot be null");
+            if (password == null) throw new IllegalArgumentException("Password cannot be null");
+            if (name == null) throw new IllegalArgumentException("Name cannot be null");
+            if (role == null) throw new IllegalArgumentException("Role cannot be null");
+            if (createdAt == null) createdAt = Instant.now();
+            if (updatedAt == null) updatedAt = Instant.now();
+            if (isActive == null) isActive = true;
         }
 
     }

@@ -3,6 +3,7 @@ package com.bifee.projectmanagement.management.domain.project;
 import com.bifee.projectmanagement.management.domain.task.Task;
 
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -92,7 +93,22 @@ public record Project (Long id,
         }
 
         public Project build() {
+            validate();
             return new Project(id, title, description, projectStatus, ownerId, createdAt, updatedAt, membersIds, tasks);
+        }
+
+        private void validate() {
+            if (title == null || title.isBlank()) throw new IllegalArgumentException("Title cannot be null or blank");
+            if (ownerId == null) throw new IllegalArgumentException("Owner cannot be null");
+            if (projectStatus == null) projectStatus = ProjectStatus.IN_PROGRESS;
+            if (membersIds == null || membersIds.isEmpty()) membersIds = Set.of(ownerId);
+            else if (!membersIds.contains(ownerId)) {
+                Set<Long> updatedMembers = new HashSet<>(membersIds);
+                updatedMembers.add(ownerId);
+                membersIds = updatedMembers;
+            }
+            if (createdAt == null) createdAt = Instant.now();
+            if (updatedAt == null) updatedAt = Instant.now();
         }
 
     }

@@ -63,16 +63,20 @@ class ProjectEntity {
         );
     }
 
-    protected static Project toDomain(ProjectEntity projectEntity){
-        return new Project(projectEntity.getId(),
-                projectEntity.getTitle(),
-                projectEntity.getDescription(),
-                projectEntity.getProjectStatus(),
-                projectEntity.getOwnerId(),
-                projectEntity.getCreatedAt(),
-                projectEntity.getUpdatedAt(),
-                projectEntity.getMembersIds(),
-                projectEntity.getTasks().stream().map(TaskEntity::toDomain).toList());
+    protected static Project toDomain(ProjectEntity projectEntity) {
+        return new Project.Builder()
+                .withId(projectEntity.id)
+                .withTitle(projectEntity.title)
+                .withDescription(projectEntity.description)
+                .withProjectStatus(projectEntity.projectStatus)
+                .withOwnerId(projectEntity.ownerId)
+                .withCreatedAt(projectEntity.createdAt)
+                .withUpdatedAt(projectEntity.updatedAt)
+                .withMembersIds(projectEntity.membersIds)
+                .withTasks(projectEntity.tasks.stream()
+                        .map(TaskEntity::toDomain)
+                        .toList())
+                .build();
     }
 
     public Long getId() {
