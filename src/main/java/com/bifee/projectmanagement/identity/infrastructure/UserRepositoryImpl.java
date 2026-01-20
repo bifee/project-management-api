@@ -5,37 +5,43 @@ import com.bifee.projectmanagement.identity.domain.User;
 import com.bifee.projectmanagement.identity.domain.UserRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 class UserRepositoryImpl implements UserRepository {
-    private final JpaUserRepository jpaProjectRepository;
+    private final JpaUserRepository jpaUserRepository;
     public UserRepositoryImpl(JpaUserRepository jpaProjectRepository) {
-        this.jpaProjectRepository = jpaProjectRepository;
+        this.jpaUserRepository = jpaProjectRepository;
     }
 
     @Override
     public User save(User user) {
         UserEntity entity = UserEntity.toEntity(user);
-        UserEntity savedEntity = jpaProjectRepository.save(entity);
+        UserEntity savedEntity = jpaUserRepository.save(entity);
         return UserEntity.toDomain(savedEntity);
     }
 
     @Override
-    public <Optional> User existsByEmail(Email email) {
-        return jpaProjectRepository.findByEmailValue(email.value()).map(UserEntity::toDomain).orElse(null);
+    public Optional<User> existsByEmail(Email email) {
+        return jpaUserRepository.findByEmailValue(email.value()).map(UserEntity::toDomain);
     }
 
     @Override
-    public <Optional> User findById(Long id) {
-        return jpaProjectRepository.findById(id).map(UserEntity::toDomain).orElse(null);
+    public Optional<User> findById(Long id) {
+        return jpaUserRepository.findById(id).map(UserEntity::toDomain);
+    }
+
+    @Override
+    public Optional<User> findByEmail(Email email) {
+        return jpaUserRepository.findByEmailValue(email.value()).map(UserEntity::toDomain);
     }
 
     @Override
     public List<User> findAll() {
-        return jpaProjectRepository.findAll().stream().map(UserEntity::toDomain).toList();
+        return jpaUserRepository.findAll().stream().map(UserEntity::toDomain).toList();
     }
 
     @Override
     public void deleteById(Long id) {
-        jpaProjectRepository.deleteById(id);
+        jpaUserRepository.deleteById(id);
     }
 }

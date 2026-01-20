@@ -22,7 +22,7 @@ class UserEntity {
     @AttributeOverride(name = "value", column = @Column(name = "email"))
     private Email email;
 
-    @Embedded()
+    @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "password"))
     private Password password;
 
