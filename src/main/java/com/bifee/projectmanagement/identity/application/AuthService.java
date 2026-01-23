@@ -7,6 +7,7 @@ import com.bifee.projectmanagement.identity.domain.Email;
 import com.bifee.projectmanagement.identity.domain.User;
 import com.bifee.projectmanagement.identity.domain.UserRepository;
 import com.bifee.projectmanagement.identity.infrastructure.security.TokenService;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +24,8 @@ public class AuthService {
     }
 
     public AuthenticationResponse login(UserLoginRequest dto){
-        Email email = new Email(dto.email());
+        var authToken = new UsernamePasswordAuthenticationToken(dto.email(), dto.password());
+        var authentication = authenticationManager.aute
 
         User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("Invalid Email/Password"));
         if(!passwordEncoder.matches(dto.password(), user.password().value())){
