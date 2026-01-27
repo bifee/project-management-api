@@ -2,6 +2,7 @@ package com.bifee.projectmanagement.identity.infrastructure.security;
 
 import com.bifee.projectmanagement.identity.domain.Email;
 import com.bifee.projectmanagement.identity.domain.UserRepository;
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -17,9 +18,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        return userRepository.findByEmail(new Email(email))
+    public UserDetails loadUserByUsername(@NonNull String emailValue) throws UsernameNotFoundException {
+        return userRepository.findByEmail(new Email(emailValue))
                 .map(UserDetailsImpl::new)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + emailValue));
     }
 }
