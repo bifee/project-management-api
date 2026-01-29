@@ -3,6 +3,7 @@ package com.bifee.projectmanagement.identity.infrastructure.security;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.bifee.projectmanagement.identity.domain.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -21,13 +22,24 @@ public class TokenService {
         try{
            Algorithm algorithm = Algorithm.HMAC256(secret);
            String token = JWT.create()
-                   .withSubject(user.email().value())
                    .withIssuer("auth-api")
-                   .withExpiresAt(java.time.Instant.now().plusSeconds(60 * 60))
+                   .withSubject(user.email().value())
+                   .withExpiresAt(this.genExpirationDate())
                    .sign(algorithm);
            return token;
         } catch (JWTCreationException exception) {
             throw new RuntimeException("Error creating JWT", exception);
+        }
+    }
+
+    public String validateToken(String token) {
+        if (token == null || token.isBlank()) return null;
+        try{
+            Algorithm algorithm = Algorithm.HMAC256(secret);
+            return JWT.require(algorithm).build().verify(token).getSubject();
+        }
+        catch (JWTVerificationException exception) {
+            return null;
         }
     }
 

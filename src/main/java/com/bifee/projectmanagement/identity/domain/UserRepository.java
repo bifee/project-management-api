@@ -8,6 +8,6 @@ public interface UserRepository {
     Optional<User> findById(Long id);
     Optional<User> findByEmail(Email email);
     List<User> findAll();
-    Optional<User> existsByEmail(Email email);
+    boolean existsByEmail(Email email);
     void deleteById(Long Id);
 }

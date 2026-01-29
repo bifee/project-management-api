@@ -11,23 +11,13 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
+
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
     }
 
-    @Transactional
-    public User register(UserRegistrationRequest dto) {
-        Email email = new Email(dto.email());
-        if(userRepository.existsByEmail(email).isPresent()) {
-            throw new IllegalArgumentException("Email already in use");
-        }
-        String encodedPassword = passwordEncoder.encode(dto.password());
-        User userToSave = dto.toDomain(encodedPassword);
-        return userRepository.save(userToSave);
-    }
+
 
 }
