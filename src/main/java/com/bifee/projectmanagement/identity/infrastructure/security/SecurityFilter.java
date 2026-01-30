@@ -16,8 +16,8 @@ import java.io.IOException;
 
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
-    TokenService tokenService;
-    UserDetailsServiceImpl userDetailsService;
+    private final TokenService tokenService;
+    private final UserDetailsServiceImpl userDetailsService;
 
     public SecurityFilter(TokenService tokenService, UserDetailsServiceImpl userDetailsService ) {
         this.tokenService = tokenService;
@@ -40,7 +40,9 @@ public class SecurityFilter extends OncePerRequestFilter {
 
     private String recoverToken(HttpServletRequest request){
         var authHeader = request.getHeader("Authorization");
-        if(authHeader == null) return null;
-        return authHeader.replace("Bearer ", "");
+        if (authHeader == null) return null;
+        if (!authHeader.startsWith("Bearer ")) return null;
+        var token = authHeader.substring(7).trim();
+        return token.isEmpty() ? null : token;
     }
 }

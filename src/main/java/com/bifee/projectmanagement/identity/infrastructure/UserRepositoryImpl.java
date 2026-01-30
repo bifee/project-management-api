@@ -3,10 +3,12 @@ package com.bifee.projectmanagement.identity.infrastructure;
 import com.bifee.projectmanagement.identity.domain.Email;
 import com.bifee.projectmanagement.identity.domain.User;
 import com.bifee.projectmanagement.identity.domain.UserRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 class UserRepositoryImpl implements UserRepository {
     private final JpaUserRepository jpaUserRepository;
     public UserRepositoryImpl(JpaUserRepository jpaProjectRepository) {
@@ -22,7 +24,7 @@ class UserRepositoryImpl implements UserRepository {
 
     @Override
     public boolean existsByEmail(Email email) {
-        return jpaUserRepository.existsByEmailValue(email.value());
+        return jpaUserRepository.existsByEmail(email.value());
     }
 
     @Override
@@ -32,7 +34,7 @@ class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Optional<User> findByEmail(Email email) {
-        return jpaUserRepository.findByEmailValue(email.value()).map(UserEntity::toDomain);
+        return jpaUserRepository.findByEmail(email.value()).map(UserEntity::toDomain);
     }
 
     @Override

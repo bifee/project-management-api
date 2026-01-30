@@ -36,7 +36,7 @@ public class TokenService {
         if (token == null || token.isBlank()) return null;
         try{
             Algorithm algorithm = Algorithm.HMAC256(secret);
-            return JWT.require(algorithm).build().verify(token).getSubject();
+            return JWT.require(algorithm).withIssuer("auth-api").build().verify(token).getSubject();
         }
         catch (JWTVerificationException exception) {
             return null;

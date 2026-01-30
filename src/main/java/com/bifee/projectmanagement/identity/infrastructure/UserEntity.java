@@ -11,22 +11,21 @@ import java.time.Instant;
 
 @Entity
 @Table(name = "users")
-class UserEntity {
+public class UserEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String name;
 
-    @Embedded
-    @AttributeOverride(name = "value", column = @Column(name = "email"))
-    private Email email;
+    @Column(name = "email", nullable = false, unique = true)
+    private String email;
 
-    @Embedded
-    @AttributeOverride(name = "value", column = @Column(name = "password"))
-    private Password password;
+    @Column(name = "password", nullable = false)
+    private String password;
 
-
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private UserRole role;
     private Instant createdAt;
     private Instant updatedAt;
@@ -35,7 +34,7 @@ class UserEntity {
     protected UserEntity() {
     }
 
-    public UserEntity(Long id, String name, Email email, Password password, UserRole role, Instant createdAt, Instant updatedAt, boolean isActive) {
+    public UserEntity(Long id, String name, String email, String password, UserRole role, Instant createdAt, Instant updatedAt, boolean isActive) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -49,8 +48,8 @@ class UserEntity {
     protected static User toDomain(UserEntity userEntity){
         return new User.Builder()
                 .withId(userEntity.getId())
-                .withEmail(userEntity.getEmail())
-                .withPassword(userEntity.getPassword())
+                .withEmail(new Email(userEntity.getEmail()))
+                .withPassword(new Password(userEntity.getPassword()))
                 .withName(userEntity.getName())
                 .withRole(userEntity.getRole())
                 .withCreatedAt(userEntity.getCreatedAt())
@@ -60,7 +59,7 @@ class UserEntity {
     }
 
     protected static UserEntity toEntity(User user){
-        return new UserEntity(user.id(), user.name(), user.email(), user.password(), user.role(), user.createdAt(), user.updatedAt(), user.isActive());
+        return new UserEntity(user.id(), user.name(), user.email().value(), user.password().value(), user.role(), user.createdAt(), user.updatedAt(), user.isActive());
     }
 
     public Long getId() {
@@ -71,11 +70,11 @@ class UserEntity {
         return name;
     }
 
-    public Email getEmail() {
+    public String getEmail() {
         return email;
     }
 
-    public Password getPassword() {
+    public String getPassword() {
         return password;
     }
 

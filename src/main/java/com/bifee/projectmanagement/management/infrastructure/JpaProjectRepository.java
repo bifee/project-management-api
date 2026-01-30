@@ -9,7 +9,7 @@ import java.util.Optional;
 
 
 @Repository
-interface JpaProjectRepository extends JpaRepository<ProjectEntity, Long> {
+public interface JpaProjectRepository extends JpaRepository<ProjectEntity, Long> {
     Optional<ProjectEntity> findByTitle(String title);
 
     Optional<ProjectEntity> findByOwnerId(Long ownerId);

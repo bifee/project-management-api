@@ -2,9 +2,11 @@ package com.bifee.projectmanagement.management.infrastructure;
 
 import com.bifee.projectmanagement.management.domain.project.Project;
 import com.bifee.projectmanagement.management.domain.project.ProjectRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+@Repository
 class ProjectRepositoryImpl implements ProjectRepository {
     private final JpaProjectRepository jpaProjectRepository;
 

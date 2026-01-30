@@ -2,9 +2,12 @@ package com.bifee.projectmanagement.management.infrastructure;
 
 import com.bifee.projectmanagement.management.domain.task.Task;
 import com.bifee.projectmanagement.management.domain.task.TaskRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+
+@Repository
 class TaskRepositoryImpl implements TaskRepository {
     private final JpaTaskRepository jpaTaskRepository;
 

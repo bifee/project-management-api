@@ -2,10 +2,12 @@ package com.bifee.projectmanagement.management.infrastructure;
 
 import com.bifee.projectmanagement.management.domain.comment.Comment;
 import com.bifee.projectmanagement.management.domain.comment.CommentRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 class CommentRepositoryImpl implements CommentRepository {
     private final JpaCommentRepository jpaCommentRepository;
 

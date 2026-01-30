@@ -11,7 +11,7 @@ import java.util.Set;
 
 @Entity
 @Table(name = "tasks")
-class TaskEntity {
+public class TaskEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String title;
