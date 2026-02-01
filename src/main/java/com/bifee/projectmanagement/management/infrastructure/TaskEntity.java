@@ -31,8 +31,7 @@ public class TaskEntity {
     private Instant createdAt;
     private Instant updatedAt;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "task_id")
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<CommentEntity> comments;
 
     public TaskEntity() {
@@ -48,20 +47,26 @@ public class TaskEntity {
         this.projectId = projectId;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
-        this.comments = comments;
+        this.setComments(comments);
     }
 
     protected static Task toDomain(TaskEntity taskEntity){
-        return new Task(taskEntity.getId(),
-                taskEntity.getTitle(),
-                taskEntity.getDescription(),
-                taskEntity.getStatus(),
-                taskEntity.getPriority(),
-                taskEntity.getAssignedUsersId(),
-                taskEntity.getProjectId(),
-                taskEntity.getCreatedAt(),
-                taskEntity.getUpdatedAt(),
-                taskEntity.getComments().stream().map(CommentEntity::toDomain).toList());
+        return new Task.Builder()
+                .withId(taskEntity.id)
+                .withTitle(taskEntity.title)
+                .withDescription(taskEntity.description)
+                .withStatus(taskEntity.status)
+                .withPriority(taskEntity.priority)
+                .withAssignedUser(taskEntity.assignedUsersId)
+                .withProject(taskEntity.projectId)
+                .withCreatedAt(taskEntity.createdAt)
+                .withUpdatedAt(taskEntity.updatedAt)
+                .withComments(
+                        taskEntity.comments.stream()
+                                .map(CommentEntity::toDomain)
+                                .toList()
+                )
+                .build();
     }
 
     protected static TaskEntity toEntity(Task task){
@@ -70,6 +75,20 @@ public class TaskEntity {
                 task.description(),
                 task.status(), task.priority(), task.assignedUsersId(), task.projectId(), task.createdAt(), task.updatedAt(), task.comments().stream().map(CommentEntity::toEntity).toList());
     }
+
+
+    private void setComments(List<CommentEntity> comments) {
+        this.comments.clear();
+        if (comments != null) {
+            comments.forEach(this::addComment);
+        }
+    }
+
+    public void addComment(CommentEntity comment) {
+        this.comments.add(comment);
+        comment.setTask(this);
+    }
+
 
     public Long getId() {
         return id;

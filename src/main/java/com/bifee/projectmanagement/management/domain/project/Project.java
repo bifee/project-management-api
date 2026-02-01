@@ -1,10 +1,8 @@
 package com.bifee.projectmanagement.management.domain.project;
 
-import com.bifee.projectmanagement.management.domain.task.Task;
 
 import java.time.Instant;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public record Project (Long id,
@@ -14,8 +12,7 @@ public record Project (Long id,
                        Long ownerId,
                        Instant createdAt,
                        Instant updatedAt,
-                       Set<Long> membersIds,
-                       List<Task> tasks
+                       Set<Long> membersIds
                        ) {
 
     public Builder mutate() {
@@ -31,7 +28,6 @@ public record Project (Long id,
         private Instant createdAt;
         private Instant updatedAt;
         private Set<Long> membersIds;
-        private List<Task> tasks;
 
 
         public Builder copy(Project source) {
@@ -43,7 +39,6 @@ public record Project (Long id,
             this.createdAt = source.createdAt;
             this.updatedAt = source.updatedAt;
             this.membersIds = source.membersIds;
-            this.tasks = source.tasks;
             return this;
         }
 
@@ -87,14 +82,9 @@ public record Project (Long id,
             return this;
         }
 
-        public Builder withTasks(List<Task> tasks) {
-            this.tasks = tasks;
-            return this;
-        }
-
         public Project build() {
             validate();
-            return new Project(id, title, description, projectStatus, ownerId, createdAt, updatedAt, membersIds, tasks);
+            return new Project(id, title, description, projectStatus, ownerId, createdAt, updatedAt, membersIds);
         }
 
         private void validate() {

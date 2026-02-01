@@ -31,8 +31,6 @@ public class AuthUserService {
     public AuthenticationResponse login(UserLoginRequest dto){
         var authToken = new UsernamePasswordAuthenticationToken(dto.email(), dto.password());
         var auth = authenticationManager.authenticate(authToken);
-
-
         var principal = auth.getPrincipal();
         if (!(principal instanceof UserDetailsImpl userDetails)) {
             throw new IllegalStateException("Unexpected principal type: " + principal.getClass());
@@ -43,13 +41,15 @@ public class AuthUserService {
         return new AuthenticationResponse(token, "Bearer", user.name());
     }
 
-    public User register(UserRegistrationRequest dto) {
+    public AuthenticationResponse register(UserRegistrationRequest dto) {
         Email email = new Email(dto.email());
         if(userRepository.existsByEmail(email)) {
             throw new IllegalArgumentException("Email already in use");
         }
         String encodedPassword = passwordEncoder.encode(dto.password());
         User userToSave = dto.toDomain(encodedPassword);
-        return userRepository.save(userToSave);
+        User savedUser = userRepository.save(userToSave);
+        String token = tokenService.generateToken(savedUser);
+        return new AuthenticationResponse(token, "Bearer", savedUser.name());
     }
 }

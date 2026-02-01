@@ -95,6 +95,11 @@ public record Task (
             return this;
         }
 
+        public Builder withComments(List<Comment> comments) {
+            this.comments = comments;
+            return this;
+        }
+
         public Task build() {
             validate();
             return new Task(id, title, description, status, priority, assignedUsersId, projectId, createdAt, updatedAt, comments);

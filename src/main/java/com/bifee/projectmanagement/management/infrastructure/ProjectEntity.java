@@ -28,14 +28,10 @@ public class ProjectEntity {
     @Column(name = "user_id")
     private Set<Long> membersIds;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "project_id")
-    private List<TaskEntity> tasks;
-    
     protected ProjectEntity() {
     }
 
-    public ProjectEntity(Long id, String title, String description, ProjectStatus projectStatus, Long ownerId, Instant createdAt, Instant updatedAt, Set<Long> membersIds, List<TaskEntity> tasks) {
+    public ProjectEntity(Long id, String title, String description, ProjectStatus projectStatus, Long ownerId, Instant createdAt, Instant updatedAt, Set<Long> membersIds) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -44,7 +40,6 @@ public class ProjectEntity {
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.membersIds = membersIds;
-        this.tasks = tasks;
     }
     
     protected static ProjectEntity toEntity(Project project){
@@ -56,10 +51,7 @@ public class ProjectEntity {
                 project.ownerId(),
                 project.createdAt(),
                 project.updatedAt(),
-                project.membersIds(),
-                project.tasks().stream()
-                        .map(TaskEntity::toEntity)
-                        .toList()
+                project.membersIds()
         );
     }
 
@@ -73,9 +65,6 @@ public class ProjectEntity {
                 .withCreatedAt(projectEntity.createdAt)
                 .withUpdatedAt(projectEntity.updatedAt)
                 .withMembersIds(projectEntity.membersIds)
-                .withTasks(projectEntity.tasks.stream()
-                        .map(TaskEntity::toDomain)
-                        .toList())
                 .build();
     }
 
@@ -111,8 +100,5 @@ public class ProjectEntity {
         return membersIds;
     }
 
-    public List<TaskEntity> getTasks() {
-        return tasks;
-    }
 }
 

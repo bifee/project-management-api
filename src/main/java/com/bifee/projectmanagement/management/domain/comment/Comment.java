@@ -1,5 +1,7 @@
 package com.bifee.projectmanagement.management.domain.comment;
 
+import com.bifee.projectmanagement.management.domain.task.Task;
+
 import java.time.Instant;
 
 public record Comment (
@@ -42,8 +44,8 @@ public record Comment (
             return this;
         }
 
-        public Builder withTask(Long taskId) {
-            this.taskId = taskId;
+        public Builder withTaskId(Long task) {
+            this.taskId = task;
             return this;
         }
 
