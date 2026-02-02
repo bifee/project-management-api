@@ -8,7 +8,6 @@ public record Comment (
      Long id,
      String content,
      Long creatorId,
-     Long taskId,
      Instant createdAt,
      Instant updatedAt
 ){
@@ -20,7 +19,6 @@ public record Comment (
         private Long id;
         private String content;
         private Long creatorId;
-        private Long taskId;
         private Instant createdAt;
         private Instant updatedAt;
 
@@ -44,11 +42,6 @@ public record Comment (
             return this;
         }
 
-        public Builder withTaskId(Long task) {
-            this.taskId = task;
-            return this;
-        }
-
         public Builder withCreatedAt(Instant createdAt) {
             this.createdAt = createdAt;
             return this;
@@ -61,12 +54,11 @@ public record Comment (
 
         public Comment build(){
             validate();
-            return new Comment(id, content, creatorId, taskId, createdAt, updatedAt);
+            return new Comment(id, content, creatorId, createdAt, updatedAt);
         }
 
         private void validate() {
             if (content == null) throw new IllegalArgumentException("Content cannot be null");
-            if (taskId == null) throw new IllegalArgumentException("Task cannot be null");
             if (creatorId == null) throw new IllegalArgumentException("Creator cannot be null");
             if (createdAt == null) createdAt = Instant.now();
             if (updatedAt == null) updatedAt = Instant.now();
