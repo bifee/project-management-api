@@ -4,6 +4,7 @@ import com.bifee.projectmanagement.management.domain.task.Task;
 import com.bifee.projectmanagement.management.domain.task.TaskRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -28,8 +29,8 @@ class TaskRepositoryImpl implements TaskRepository {
     }
 
     @Override
-    public Optional<Task> findByProjectId(Long projectId) {
-        return jpaTaskRepository.findByProjectId(projectId).map(TaskEntity::toDomain);
+    public List<Task> findByProjectId(Long projectId) {
+        return jpaTaskRepository.findByProjectId(projectId).stream().map(TaskEntity::toDomain).toList();
     }
 
     @Override
