@@ -17,6 +17,21 @@ public class TaskService {
         this.projectService = projectService;
     }
 
+    @Transactional(readOnly = true)
+    public Task getTaskById(Long id){
+        return taskRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Task not found with id: " + id));
+    }
+
+    @Transactional
+    public List<Task> getTasksByProjectId(Long projectId){
+        List<Task> tasks = taskRepository.findByProjectId(projectId);
+        if (tasks.isEmpty()){
+            throw new IllegalArgumentException("No tasks found for project with id: " + projectId);
+        }
+        return tasks;
+    }
+
+
     @Transactional
     public Task createTask(Long ProjectId, CreateTaskRequest request, Long creatorId){
         projectService.getProjectById(ProjectId);
@@ -30,20 +45,6 @@ public class TaskService {
                 .withAssignedUser(request.assignedUsersId())
                 .build();
         return taskRepository.save(task);
-    }
-
-    @Transactional(readOnly = true)
-    public Task getTaskById(Long id){
-        return taskRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Task not found with id: " + id));
-    }
-
-    @Transactional
-    public List<Task> getTasksByProjectId(Long projectId){
-        List<Task> tasks = taskRepository.findByProjectId(projectId);
-        if (tasks.isEmpty()){
-            throw new IllegalArgumentException("No tasks found for project with id: " + projectId);
-        }
-        return tasks;
     }
 
     @Transactional
@@ -82,7 +83,35 @@ public class TaskService {
                 .withContent(content)
                 .withCreator(requesterId).build();
 
-        return taskRepository.save(updateTask());
+        List<Comment> comment_list = task.comments();
+        comment_list.add(comment);
+        Task updatedTask = task.mutate().withComments(comment_list).build();
+
+        return taskRepository.save(updatedTask);
+    }
+
+    @Transactional
+    public Task removeComment(Long taskId, Long commentId, Long requesterId){
+        Task task = getTaskById(taskId);
+        if (!projectService.isUserMemberOfProject(task.projectId(), requesterId)) {
+            throw new IllegalArgumentException("User is not member of project");
+        }
+        List<Comment> comment_list = task.comments();
+        comment_list.removeIf(comment -> comment.id().equals(commentId));
+        Task updatedTask = task.mutate().withComments(comment_list).build();
+        return taskRepository.save(updatedTask);
+    }
+
+    @Transactional
+    public Task updateComment(Long taskId, Long commentId, String content, Long requesterId){
+        Task task = getTaskById(taskId);
+        if (!projectService.isUserMemberOfProject(task.projectId(), requesterId)) {
+            throw new IllegalArgumentException("User is not member of project");
+        }
+        List<Comment> comment_list = task.comments();
+        comment_list.stream().filter(comment -> comment.id().equals(commentId)).findFirst().ifPresent(comment -> comment.mutate().withContent(content).build());
+        Task updatedTask = task.mutate().withComments(comment_list).build();
+        return taskRepository.save(updatedTask);
     }
 
 
