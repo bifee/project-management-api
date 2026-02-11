@@ -15,6 +15,14 @@ public record Project (Long id,
                        Set<Long> membersIds
                        ) {
 
+
+    public boolean isOwner(Long userId) {
+        return ownerId.equals(userId);
+    }
+
+    public boolean isMember(Long userId) {
+        return membersIds.contains(userId);
+    }
     public Builder mutate() {
         return new Builder().copy(this);
     }

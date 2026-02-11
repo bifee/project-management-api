@@ -13,6 +13,10 @@ public record User(Long id,
                    Boolean isActive) {
 
 
+    public boolean isAdmin() {
+        return role == UserRole.ADMIN;
+    }
+
     public Builder mutate() {
         return new Builder().copy(this);
     }

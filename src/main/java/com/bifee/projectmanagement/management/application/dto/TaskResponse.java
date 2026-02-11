@@ -33,4 +33,8 @@ public record TaskResponse(
                 task.comments()
         );
     }
+
+    public static List<TaskResponse> fromList(List<Task> tasks){
+        return tasks.stream().map(TaskResponse::from).toList();
+    }
 }

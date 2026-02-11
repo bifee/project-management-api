@@ -42,8 +42,7 @@ public class AuthUserService {
     }
 
     public AuthenticationResponse register(UserRegistrationRequest dto) {
-        Email email = new Email(dto.email());
-        if(userRepository.existsByEmail(email)) {
+        if(userRepository.existsByEmail(dto.email())) {
             throw new IllegalArgumentException("Email already in use");
         }
         String encodedPassword = passwordEncoder.encode(dto.password());

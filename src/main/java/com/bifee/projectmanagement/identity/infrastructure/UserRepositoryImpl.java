@@ -3,6 +3,7 @@ package com.bifee.projectmanagement.identity.infrastructure;
 import com.bifee.projectmanagement.identity.domain.Email;
 import com.bifee.projectmanagement.identity.domain.User;
 import com.bifee.projectmanagement.identity.domain.UserRepository;
+import com.bifee.projectmanagement.identity.domain.UserRole;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -23,8 +24,8 @@ class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public boolean existsByEmail(Email email) {
-        return jpaUserRepository.existsByEmail(email.value());
+    public boolean existsByEmail(String email) {
+        return jpaUserRepository.existsByEmail(email);
     }
 
     @Override
@@ -42,6 +43,20 @@ class UserRepositoryImpl implements UserRepository {
         return jpaUserRepository.findAll().stream().map(UserEntity::toDomain).toList();
     }
 
+    @Override
+    public List<User> findByIsActiveTrue(){
+        return jpaUserRepository.findByIsActiveTrue().stream().map(UserEntity::toDomain).toList();
+    }
+
+    @Override
+    public List<User> findByRole(UserRole role){
+        return jpaUserRepository.findByRole(role).stream().map(UserEntity::toDomain).toList();
+    }
+
+    @Override
+    public List<User> findByName(String name){
+        return jpaUserRepository.findByNameContaining(name).stream().map(UserEntity::toDomain).toList();
+    }
     @Override
     public void deleteById(Long id) {
         jpaUserRepository.deleteById(id);

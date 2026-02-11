@@ -48,7 +48,7 @@ public class ProjectService {
     @Transactional
     public Project addMemberToProject(Long memberId, Long projectId, Long requesterId) {
         Project project = getProjectById(projectId);
-        if(!isUserOwnerOfProject(projectId, requesterId)){
+        if(!project.isOwner(requesterId)){
             throw new IllegalArgumentException("Only owner can add members to project");
         }
 
@@ -66,10 +66,10 @@ public class ProjectService {
     @Transactional
     public Project removeMemberFromProject(Long memberId, Long projectId, Long requesterId) {
         Project project = getProjectById(projectId);
-        if(!isUserOwnerOfProject(projectId, requesterId)){
+        if(!project.isOwner(requesterId)){
             throw new IllegalArgumentException("Only owner can remove members from project");
         }
-        if (!project.membersIds().contains(memberId)) {
+        if (!project.isMember(memberId)) {
             throw new IllegalArgumentException("Member not in project");
         }
         if (project.ownerId().equals(memberId)) {
@@ -87,7 +87,7 @@ public class ProjectService {
     @Transactional
     public Project updateProject(Long ProjectId, UpdateProjectRequest dto, Long requesterId) {
         Project project = getProjectById(ProjectId);
-        if (!isUserOwnerOfProject(ProjectId, requesterId)) {
+        if (!project.isOwner(requesterId)) {
             throw new IllegalArgumentException("Only owner can update project");
         }
         Project.Builder builder = project.mutate();
@@ -106,23 +106,12 @@ public class ProjectService {
     @Transactional
     public void deleteProjectById(Long id, Long requesterId) {
         Project project = getProjectById(id);
-        if(!isUserOwnerOfProject(id, requesterId)){
+        if(!project.isOwner(requesterId)){
             throw new IllegalArgumentException("Only owner can delete project");
         }
         projectRepository.deleteById(id);
     }
 
-    @Transactional(readOnly = true)
-    public boolean isUserMemberOfProject(Long projectId, Long userId) {
-        Project project = getProjectById(projectId);
-        return project.membersIds().contains(userId);
-    }
-
-    @Transactional(readOnly = true)
-    public boolean isUserOwnerOfProject(Long projectId, Long userId) {
-        Project project = getProjectById(projectId);
-        return project.ownerId().equals(userId);
-    }
 
 
 

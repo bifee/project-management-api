@@ -75,7 +75,7 @@ public class TaskController {
     @GetMapping("/{taskId}/comment")
     public List<CommentResponse> getCommentsByTaskId(@PathVariable Long taskId) {
         List<Comment> comments = taskService.getCommentsByTaskId(taskId);
-        return comments.stream().map(CommentResponse::from).toList();
+        return CommentResponse.fromList(comments);
     }
 
     @GetMapping("/{taskId}/comment/{commentId}")

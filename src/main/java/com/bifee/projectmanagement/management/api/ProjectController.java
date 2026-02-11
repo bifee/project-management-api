@@ -31,10 +31,22 @@ public class ProjectController {
         return ProjectResponse.from(project);
     }
 
+    @GetMapping("/owner/{ownerId}")
+    public ProjectResponse getProjectByOwnerId(@PathVariable Long ownerId){
+        Project project = projectService.getProjectByOwnerId(ownerId);
+        return ProjectResponse.from(project);
+    }
+
     @GetMapping("/search")
     public ProjectResponse searchProject(@RequestParam String title){
         Project project = projectService.getProjectByTitle(title);
         return ProjectResponse.from(project);
+    }
+
+    @GetMapping("/{projectId}/task")
+    public List<TaskResponse> getAllTasksByProjectId(@PathVariable @Valid Long projectId){
+        List<Task> tasks = taskService.getTasksByProjectId(projectId);
+        return TaskResponse.fromList(tasks);
     }
 
     @PostMapping
@@ -87,11 +99,6 @@ public class ProjectController {
         return TaskResponse.from(task);
     }
 
-    @GetMapping("/{projectId}/task")
-    public List<TaskResponse> getAllTasksByProjectId(@PathVariable @Valid Long projectId){
-        List<Task> tasks = taskService.getTasksByProjectId(projectId);
-        return tasks.stream().map(TaskResponse::from).toList();
-    }
 
 
 

@@ -3,6 +3,7 @@ package com.bifee.projectmanagement.management.application;
 import com.bifee.projectmanagement.management.application.dto.CreateTaskRequest;
 import com.bifee.projectmanagement.management.application.dto.UpdateTaskRequest;
 import com.bifee.projectmanagement.management.domain.comment.Comment;
+import com.bifee.projectmanagement.management.domain.project.Project;
 import com.bifee.projectmanagement.management.domain.task.Task;
 import com.bifee.projectmanagement.management.domain.task.TaskRepository;
 import org.springframework.stereotype.Service;
@@ -36,8 +37,8 @@ public class TaskService {
 
     @Transactional
     public Task createTask(Long ProjectId, CreateTaskRequest request, Long creatorId){
-        projectService.getProjectById(ProjectId);
-        if(!projectService.isUserMemberOfProject(ProjectId, creatorId)){
+        Project project = projectService.getProjectById(ProjectId);
+        if(!project.isMember(creatorId)){
             throw new IllegalArgumentException("User is not member of project");
         }
         Task task = new Task.Builder().withTitle(request.title())
@@ -52,7 +53,8 @@ public class TaskService {
     @Transactional
     public Task updateTask(Long taskId, UpdateTaskRequest request, Long requesterId){
         Task task = getTaskById(taskId);
-        if(!projectService.isUserMemberOfProject(task.projectId(), requesterId)){
+        Project project = projectService.getProjectById(task.projectId());
+        if(!project.isMember(requesterId)){
             throw new IllegalArgumentException("User is not member of project");
         }
         Task.Builder builder = task.mutate();
@@ -69,7 +71,8 @@ public class TaskService {
     @Transactional
     public void deleteTask(Long id, Long requesterId){
         Task task = getTaskById(id);
-        if(!projectService.isUserMemberOfProject(task.projectId(), requesterId)){
+        Project project = projectService.getProjectById(task.projectId());
+        if(!project.isMember(requesterId)){
             throw new IllegalArgumentException("User is not member of project");
         }
         taskRepository.deleteById(id);
@@ -79,7 +82,8 @@ public class TaskService {
     @Transactional
     public Task addComment(Long taskId, String content, Long requesterId){
         Task task = getTaskById(taskId);
-        if (!projectService.isUserMemberOfProject(task.projectId(), requesterId)) {
+        Project project = projectService.getProjectById(task.projectId());
+        if (!project.isMember(requesterId)) {
             throw new IllegalArgumentException("User is not member of project");
         }
         Comment comment = new Comment.Builder()
@@ -96,7 +100,8 @@ public class TaskService {
     @Transactional
     public Task removeComment(Long taskId, Long commentId, Long requesterId){
         Task task = getTaskById(taskId);
-        if (!projectService.isUserMemberOfProject(task.projectId(), requesterId)) {
+        Project project = projectService.getProjectById(task.projectId());
+        if (!project.isMember(requesterId)) {
             throw new IllegalArgumentException("User is not member of project");
         }
         List<Comment> comment_list = task.comments();
@@ -108,7 +113,8 @@ public class TaskService {
     @Transactional
     public Task updateComment(Long taskId, Long commentId, String content, Long requesterId){
         Task task = getTaskById(taskId);
-        if (!projectService.isUserMemberOfProject(task.projectId(), requesterId)) {
+        Project project = projectService.getProjectById(task.projectId());
+        if (!project.isMember(requesterId)) {
             throw new IllegalArgumentException("User is not member of project");
         }
         List<Comment> comment_list = task.comments();
