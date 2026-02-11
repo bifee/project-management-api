@@ -2,23 +2,27 @@ package com.bifee.projectmanagement.management.api;
 
 import com.bifee.projectmanagement.identity.infrastructure.security.UserDetailsImpl;
 import com.bifee.projectmanagement.management.application.ProjectService;
-import com.bifee.projectmanagement.management.application.dto.CreateProjectRequest;
-import com.bifee.projectmanagement.management.application.dto.ProjectResponse;
-import com.bifee.projectmanagement.management.application.dto.UpdateProjectRequest;
+import com.bifee.projectmanagement.management.application.TaskService;
+import com.bifee.projectmanagement.management.application.dto.*;
 import com.bifee.projectmanagement.management.domain.project.Project;
+import com.bifee.projectmanagement.management.domain.task.Task;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/project")
 public class ProjectController {
     private final ProjectService projectService;
+    private final TaskService taskService;
 
-    public ProjectController(ProjectService projectService) {
+    public ProjectController(ProjectService projectService, TaskService taskService) {
         this.projectService = projectService;
+        this.taskService = taskService;
     }
 
     @GetMapping("/{projectId}")
@@ -72,6 +76,22 @@ public class ProjectController {
         return ProjectResponse.from(project);
     }
 
+
+    @PostMapping("/{projectId}/task")
+    @ResponseStatus(HttpStatus.CREATED)
+    public TaskResponse createTask(@PathVariable Long projectId,
+                                   @RequestBody @Valid CreateTaskRequest request,
+                                   @AuthenticationPrincipal UserDetailsImpl userDetails){
+        Long requesterId = userDetails.user().id();
+        Task task = taskService.createTask(projectId, request, requesterId);
+        return TaskResponse.from(task);
+    }
+
+    @GetMapping("/{projectId}/task")
+    public List<TaskResponse> getAllTasksByProjectId(@PathVariable @Valid Long projectId){
+        List<Task> tasks = taskService.getTasksByProjectId(projectId);
+        return tasks.stream().map(TaskResponse::from).toList();
+    }
 
 
 

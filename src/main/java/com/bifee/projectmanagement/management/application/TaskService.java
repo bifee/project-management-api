@@ -34,7 +34,6 @@ public class TaskService {
         return tasks;
     }
 
-
     @Transactional
     public Task createTask(Long ProjectId, CreateTaskRequest request, Long creatorId){
         projectService.getProjectById(ProjectId);
@@ -76,6 +75,7 @@ public class TaskService {
         taskRepository.deleteById(id);
     }
 
+
     @Transactional
     public Task addComment(Long taskId, String content, Long requesterId){
         Task task = getTaskById(taskId);
@@ -115,6 +115,26 @@ public class TaskService {
         comment_list.stream().filter(comment -> comment.id().equals(commentId)).findFirst().ifPresent(comment -> comment.mutate().withContent(content).build());
         Task updatedTask = task.mutate().withComments(comment_list).build();
         return taskRepository.save(updatedTask);
+    }
+
+    @Transactional
+    public List<Comment> getCommentsByTaskId(Long taskId){
+        Task task = getTaskById(taskId);
+        if (task.comments().isEmpty()){
+            return List.of();
+        }
+        return task.comments();
+    }
+
+    @Transactional
+    public Comment getCommentById(Long taskId, Long commentId){
+        Task task = getTaskById(taskId);
+        return task.getCommentById(commentId);
+    }
+
+    @Transactional
+    public int getTaskCommentsCount(Long taskId){
+        return getCommentsByTaskId(taskId).size();
     }
 
 

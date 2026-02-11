@@ -4,6 +4,7 @@ import com.bifee.projectmanagement.management.domain.comment.Comment;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 public record Task (
@@ -18,6 +19,12 @@ public record Task (
      Instant updatedAt,
      List<Comment> comments
 ){
+
+    public Comment getCommentById(Long commentId) {
+        return comments.stream().
+                filter(comment -> comment.id().equals(commentId)).findFirst()
+                .orElseThrow(() -> new NoSuchElementException("Comment not found: " + commentId));
+    }
 
     public Builder mutate() {
         return new Builder().copy(this);
