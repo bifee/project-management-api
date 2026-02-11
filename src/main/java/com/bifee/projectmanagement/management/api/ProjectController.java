@@ -13,7 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
-@RequestMapping("/projects")
+@RequestMapping("/project")
 public class ProjectController {
     private final ProjectService projectService;
 
@@ -49,7 +49,7 @@ public class ProjectController {
         projectService.deleteProjectById(projectId, projectId);
     }
 
-    @PatchMapping
+    @PatchMapping("/{projectId}")
     public ProjectResponse updateProject(@PathVariable Long projectId,
                                          @RequestBody @Valid UpdateProjectRequest dto,
                                          @AuthenticationPrincipal UserDetailsImpl userDetails){
@@ -71,6 +71,7 @@ public class ProjectController {
         Project project = projectService.removeMemberFromProject(memberId, projectId, requesterId);
         return ProjectResponse.from(project);
     }
+
 
 
 

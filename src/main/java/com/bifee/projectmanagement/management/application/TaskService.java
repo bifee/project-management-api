@@ -5,10 +5,13 @@ import com.bifee.projectmanagement.management.application.dto.UpdateTaskRequest;
 import com.bifee.projectmanagement.management.domain.comment.Comment;
 import com.bifee.projectmanagement.management.domain.task.Task;
 import com.bifee.projectmanagement.management.domain.task.TaskRepository;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+
+@Service
 public class TaskService {
     private final TaskRepository taskRepository;
     private final ProjectService projectService;
