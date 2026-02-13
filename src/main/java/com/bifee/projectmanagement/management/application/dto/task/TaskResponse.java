@@ -1,6 +1,6 @@
 package com.bifee.projectmanagement.management.application.dto.task;
 
-import com.bifee.projectmanagement.management.domain.comment.Comment;
+import com.bifee.projectmanagement.management.application.dto.comment.CommentResponse;
 import com.bifee.projectmanagement.management.domain.task.Task;
 import com.bifee.projectmanagement.management.domain.task.TaskPriority;
 import com.bifee.projectmanagement.management.domain.task.TaskStatus;
@@ -17,7 +17,7 @@ public record TaskResponse(
         TaskPriority priority,
         Set<Long> assignedUsersId,
         Long projectId,
-        List<Comment> comments,
+        List<CommentResponse> comments,
         Instant createdAt,
         Instant updatedAt
 ) {
@@ -31,7 +31,11 @@ public record TaskResponse(
                 task.priority(),
                 task.assignedUsersId(),
                 task.projectId(),
-                task.comments(),
+                task.comments() != null ?
+                        task.comments().stream()
+                        .map(CommentResponse::from)
+                        .toList()
+                        : List.of(),
                 task.createdAt(),
                 task.updatedAt()
         );

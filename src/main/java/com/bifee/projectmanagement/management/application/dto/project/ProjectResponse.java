@@ -4,6 +4,7 @@ import com.bifee.projectmanagement.management.domain.project.Project;
 import com.bifee.projectmanagement.management.domain.project.ProjectStatus;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 
 public record ProjectResponse(
@@ -28,5 +29,9 @@ public record ProjectResponse(
                 project.createdAt(),
                 project.updatedAt()
         );
+    }
+
+    public static List<ProjectResponse> fromList(List<Project> projects){
+        return projects.stream().map(ProjectResponse::from).toList();
     }
 }

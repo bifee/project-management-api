@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -39,13 +40,13 @@ public class ProjectService {
     }
 
     @Transactional(readOnly = true)
-    public Project getProjectByTitle(String title) {
-        return projectRepository.findByTitle(title).orElseThrow(() -> new IllegalArgumentException("Project not found with title: " + title));
+    public List<Project> getProjectsByTitle(String title) {
+        return projectRepository.findAllByTitle(title);
     }
 
     @Transactional(readOnly = true)
-    public Project getProjectByOwnerId(Long ownerId) {
-        return projectRepository.findByOwnerId(ownerId).orElseThrow(() -> new IllegalArgumentException("Project not found with ownerId: " + ownerId));
+    public List<Project> getProjectsByOwnerId(Long ownerId) {
+        return projectRepository.findAllByOwnerId(ownerId);
     }
 
     @Transactional

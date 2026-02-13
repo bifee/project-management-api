@@ -4,13 +4,11 @@ package com.bifee.projectmanagement.management.infrastructure;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.nio.channels.FileChannel;
-import java.util.Optional;
+import java.util.List;
 
 
 @Repository
 public interface JpaProjectRepository extends JpaRepository<ProjectEntity, Long> {
-    Optional<ProjectEntity> findByTitle(String title);
-
-    Optional<ProjectEntity> findByOwnerId(Long ownerId);
+    List<ProjectEntity> findAllByTitleContaining(String title);
+    List<ProjectEntity> findAllByOwnerId(Long ownerId);
 }

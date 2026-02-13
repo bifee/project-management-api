@@ -4,6 +4,7 @@ import com.bifee.projectmanagement.management.domain.project.Project;
 import com.bifee.projectmanagement.management.domain.project.ProjectRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -27,13 +28,13 @@ class ProjectRepositoryImpl implements ProjectRepository {
     }
 
     @Override
-    public Optional<Project> findByTitle(String title) {
-        return jpaProjectRepository.findByTitle(title).map(ProjectEntity::toDomain);
+    public List<Project> findAllByTitle(String title) {
+        return jpaProjectRepository.findAllByTitleContaining(title).stream().map(ProjectEntity::toDomain).toList();
     }
 
     @Override
-    public Optional<Project> findByOwnerId(Long ownerId) {
-        return jpaProjectRepository.findByOwnerId(ownerId).map(ProjectEntity::toDomain);
+    public List<Project> findAllByOwnerId(Long ownerId) {
+        return jpaProjectRepository.findAllByOwnerId(ownerId).stream().map(ProjectEntity::toDomain).toList();
     }
 
     @Override

@@ -58,7 +58,6 @@ public class TaskController {
     }
 
     @DeleteMapping("/{taskId}/comments/{commentId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     public TaskResponse removeCommentFromTask(@PathVariable Long taskId, @PathVariable Long commentId, @AuthenticationPrincipal UserDetailsImpl userDetails){
         Long requesterId = userDetails.user().id();
         Task task = taskService.removeComment(taskId, commentId, requesterId);

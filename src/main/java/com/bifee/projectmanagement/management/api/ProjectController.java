@@ -36,16 +36,23 @@ public class ProjectController {
     }
 
     @GetMapping("/owner/{ownerId}")
-    public ProjectResponse getProjectByOwnerId(@PathVariable Long ownerId){
-        Project project = projectService.getProjectByOwnerId(ownerId);
-        return ProjectResponse.from(project);
+    public List<ProjectResponse> getProjectsByOwnerId(@PathVariable Long ownerId){
+        List<Project> projects = projectService.getProjectsByOwnerId(ownerId);
+        return ProjectResponse.fromList(projects);
+    }
+
+    @GetMapping("/me")
+    public List<ProjectResponse> getMyProjects(@AuthenticationPrincipal UserDetailsImpl userDetails){
+        List<Project> projects = projectService.getProjectsByOwnerId(userDetails.user().id());
+        return ProjectResponse.fromList(projects);
     }
 
     @GetMapping("/search")
-    public ProjectResponse searchProject(@RequestParam String title){
-        Project project = projectService.getProjectByTitle(title);
-        return ProjectResponse.from(project);
+    public List<ProjectResponse> searchProjects(@RequestParam String title){
+        List<Project> projects = projectService.getProjectsByTitle(title);
+        return ProjectResponse.fromList(projects);
     }
+
 
     @GetMapping("/{projectId}/tasks")
     public List<TaskResponse> getAllTasksByProjectId(@PathVariable Long projectId){
