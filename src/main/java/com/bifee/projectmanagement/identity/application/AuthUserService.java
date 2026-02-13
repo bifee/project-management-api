@@ -32,7 +32,7 @@ public class AuthUserService {
         var auth = authenticationManager.authenticate(authToken);
         var principal = auth.getPrincipal();
         if (!(principal instanceof UserDetailsImpl userDetails)) {
-            throw new IllegalStateException("Unexpected principal type: " + principal.getClass());
+            throw new IllegalStateException("Unexpected principal type: " + (principal != null ? principal.getClass() : null));
         }
         var user = userDetails.user();
         String token = tokenService.generateToken(user);
