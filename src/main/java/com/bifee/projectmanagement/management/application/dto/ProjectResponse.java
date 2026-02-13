@@ -4,6 +4,7 @@ import com.bifee.projectmanagement.management.domain.project.Project;
 import com.bifee.projectmanagement.management.domain.project.ProjectStatus;
 import com.bifee.projectmanagement.management.infrastructure.ProjectEntity;
 
+import java.time.Instant;
 import java.util.Set;
 
 public record ProjectResponse(
@@ -12,7 +13,9 @@ public record ProjectResponse(
         String description,
         ProjectStatus status,
         Set<Long> membersIds,
-        Long ownerId
+        Long ownerId,
+        Instant createdAt,
+        Instant updatedAt
 ) {
 
     public static ProjectResponse from(Project project) {
@@ -22,7 +25,9 @@ public record ProjectResponse(
                 project.description(),
                 project.projectStatus(),
                 project.membersIds(),
-                project.ownerId()
+                project.ownerId(),
+                project.createdAt(),
+                project.updatedAt()
         );
     }
 }

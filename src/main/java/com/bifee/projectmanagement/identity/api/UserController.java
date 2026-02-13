@@ -11,12 +11,11 @@ import com.bifee.projectmanagement.identity.infrastructure.security.UserDetailsI
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequestMapping("/user")
 public class UserController {
     private final UserService userService;
@@ -89,7 +88,7 @@ public class UserController {
 
     @PatchMapping("/{userId}/password")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateMyPassword(@PathVariable Long userId,
+    public void updatePassword(@PathVariable Long userId,
                                  @RequestBody @Valid UpdatePasswordRequest request,
                                  @AuthenticationPrincipal UserDetailsImpl userDetails){
         Long requesterId = userDetails.user().id();

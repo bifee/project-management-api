@@ -104,7 +104,7 @@ public class ProjectService {
     }
 
     @Transactional
-    public void deleteProjectById(Long id, Long requesterId) {
+    public void deleteProject(Long id, Long requesterId) {
         Project project = getProjectById(id);
         if(!project.isOwner(requesterId)){
             throw new IllegalArgumentException("Only owner can delete project");

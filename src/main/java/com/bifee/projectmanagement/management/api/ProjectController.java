@@ -9,13 +9,12 @@ import com.bifee.projectmanagement.management.domain.task.Task;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
-@RequestMapping("/project")
+@RestController
+@RequestMapping("/api/projects")
 public class ProjectController {
     private final ProjectService projectService;
     private final TaskService taskService;
@@ -43,8 +42,8 @@ public class ProjectController {
         return ProjectResponse.from(project);
     }
 
-    @GetMapping("/{projectId}/task")
-    public List<TaskResponse> getAllTasksByProjectId(@PathVariable @Valid Long projectId){
+    @GetMapping("/{projectId}/tasks")
+    public List<TaskResponse> getAllTasksByProjectId(@PathVariable Long projectId){
         List<Task> tasks = taskService.getTasksByProjectId(projectId);
         return TaskResponse.fromList(tasks);
     }
@@ -62,7 +61,8 @@ public class ProjectController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteProject(@PathVariable Long projectId,
                               @AuthenticationPrincipal UserDetailsImpl userDetails){
-        projectService.deleteProjectById(projectId, projectId);
+        Long requesterId = userDetails.user().id();
+        projectService.deleteProject(projectId, requesterId);
     }
 
     @PatchMapping("/{projectId}")
@@ -74,8 +74,8 @@ public class ProjectController {
         return ProjectResponse.from(project);
     }
 
-    @PostMapping("/{projectId}/members")
-    public ProjectResponse addMemberToProject(@PathVariable Long projectId, @RequestBody Long memberId, @AuthenticationPrincipal UserDetailsImpl userDetails){
+    @PostMapping("/{projectId}/members/{memberId}")
+    public ProjectResponse addMemberToProject(@PathVariable Long projectId, @PathVariable Long memberId, @AuthenticationPrincipal UserDetailsImpl userDetails){
         Long requesterId = userDetails.user().id();
         Project project = projectService.addMemberToProject(memberId, projectId, requesterId);
         return ProjectResponse.from(project);
@@ -89,7 +89,7 @@ public class ProjectController {
     }
 
 
-    @PostMapping("/{projectId}/task")
+    @PostMapping("/{projectId}/tasks")
     @ResponseStatus(HttpStatus.CREATED)
     public TaskResponse createTask(@PathVariable Long projectId,
                                    @RequestBody @Valid CreateTaskRequest request,

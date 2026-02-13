@@ -7,6 +7,7 @@ import com.bifee.projectmanagement.management.domain.task.Task;
 import com.bifee.projectmanagement.management.domain.task.TaskPriority;
 import com.bifee.projectmanagement.management.domain.task.TaskStatus;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 
@@ -18,7 +19,9 @@ public record TaskResponse(
         TaskPriority priority,
         Set<Long> assignedUsersId,
         Long projectId,
-        List<Comment> comments
+        List<Comment> comments,
+        Instant createdAt,
+        Instant updatedAt
 ) {
 
     public static TaskResponse from(Task task) {
@@ -30,7 +33,9 @@ public record TaskResponse(
                 task.priority(),
                 task.assignedUsersId(),
                 task.projectId(),
-                task.comments()
+                task.comments(),
+                task.createdAt(),
+                task.updatedAt()
         );
     }
 

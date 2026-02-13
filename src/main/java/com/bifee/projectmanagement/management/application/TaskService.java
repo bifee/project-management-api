@@ -1,6 +1,7 @@
 package com.bifee.projectmanagement.management.application;
 
 import com.bifee.projectmanagement.management.application.dto.CreateTaskRequest;
+import com.bifee.projectmanagement.management.application.dto.CommentRequest;
 import com.bifee.projectmanagement.management.application.dto.UpdateTaskRequest;
 import com.bifee.projectmanagement.management.domain.comment.Comment;
 import com.bifee.projectmanagement.management.domain.project.Project;
@@ -80,14 +81,14 @@ public class TaskService {
 
 
     @Transactional
-    public Task addComment(Long taskId, String content, Long requesterId){
+    public Task addComment(Long taskId, CommentRequest request, Long requesterId){
         Task task = getTaskById(taskId);
         Project project = projectService.getProjectById(task.projectId());
         if (!project.isMember(requesterId)) {
             throw new IllegalArgumentException("User is not member of project");
         }
         Comment comment = new Comment.Builder()
-                .withContent(content)
+                .withContent(request.content())
                 .withCreator(requesterId).build();
 
         List<Comment> comment_list = task.comments();
@@ -111,14 +112,14 @@ public class TaskService {
     }
 
     @Transactional
-    public Task updateComment(Long taskId, Long commentId, String content, Long requesterId){
+    public Task updateComment(Long taskId, Long commentId, CommentRequest request, Long requesterId){
         Task task = getTaskById(taskId);
         Project project = projectService.getProjectById(task.projectId());
         if (!project.isMember(requesterId)) {
             throw new IllegalArgumentException("User is not member of project");
         }
         List<Comment> comment_list = task.comments();
-        comment_list.stream().filter(comment -> comment.id().equals(commentId)).findFirst().ifPresent(comment -> comment.mutate().withContent(content).build());
+        comment_list.stream().filter(comment -> comment.id().equals(commentId)).findFirst().ifPresent(comment -> comment.mutate().withContent(request.content()).build());
         Task updatedTask = task.mutate().withComments(comment_list).build();
         return taskRepository.save(updatedTask);
     }

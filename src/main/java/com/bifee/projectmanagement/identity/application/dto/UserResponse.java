@@ -13,7 +13,9 @@ public record UserResponse(
         String email,
         String name,
         UserRole role,
-        Boolean isActive
+        Boolean isActive,
+        Instant createdAt,
+        Instant updatedAt
 ) {
 
     public static UserResponse from(User user) {
@@ -22,7 +24,9 @@ public record UserResponse(
                 user.email().value(),
                 user.name(),
                 user.role(),
-                user.isActive()
+                user.isActive(),
+                user.createdAt(),
+                user.updatedAt()
         );
     }
 
