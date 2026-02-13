@@ -1,8 +1,7 @@
-package com.bifee.projectmanagement.management.application.dto;
+package com.bifee.projectmanagement.management.application.dto.project;
 
 import com.bifee.projectmanagement.management.domain.project.Project;
 import com.bifee.projectmanagement.management.domain.project.ProjectStatus;
-import com.bifee.projectmanagement.management.infrastructure.ProjectEntity;
 
 import java.time.Instant;
 import java.util.Set;

@@ -1,7 +1,8 @@
 package com.bifee.projectmanagement.management.application;
 
-import com.bifee.projectmanagement.management.application.dto.CreateProjectRequest;
-import com.bifee.projectmanagement.management.application.dto.UpdateProjectRequest;
+import com.bifee.projectmanagement.management.application.dto.project.AddMembersRequest;
+import com.bifee.projectmanagement.management.application.dto.project.CreateProjectRequest;
+import com.bifee.projectmanagement.management.application.dto.project.UpdateProjectRequest;
 import com.bifee.projectmanagement.management.domain.project.Project;
 import com.bifee.projectmanagement.management.domain.project.ProjectRepository;
 import com.bifee.projectmanagement.management.domain.project.ProjectStatus;
@@ -9,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -46,18 +49,24 @@ public class ProjectService {
     }
 
     @Transactional
-    public Project addMemberToProject(Long memberId, Long projectId, Long requesterId) {
+    public Project addMembersToProject(AddMembersRequest request, Long projectId, Long requesterId) {
         Project project = getProjectById(projectId);
         if(!project.isOwner(requesterId)){
             throw new IllegalArgumentException("Only owner can add members to project");
         }
 
-        if (project.membersIds().contains(memberId)) {
-            throw new IllegalArgumentException("Member already in project");
+        Set<Long> alreadyMembers = request.userIds().stream()
+                .filter(project::isMember)
+                .collect(Collectors.toSet());
+
+        if (!alreadyMembers.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Users already members: " + alreadyMembers
+            );
         }
 
         var updatedMembers = new HashSet<>(project.membersIds());
-        updatedMembers.add(memberId);
+        updatedMembers.addAll(request.userIds());
 
         Project updatedProject = project.mutate().withMembersIds(updatedMembers).build();
         return projectRepository.save(updatedProject);

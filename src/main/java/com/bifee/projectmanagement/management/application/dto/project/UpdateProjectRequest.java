@@ -1,4 +1,4 @@
-package com.bifee.projectmanagement.management.application.dto;
+package com.bifee.projectmanagement.management.application.dto.project;
 
 import com.bifee.projectmanagement.management.domain.project.ProjectStatus;
 

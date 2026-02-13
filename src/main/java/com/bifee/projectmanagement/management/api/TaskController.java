@@ -2,10 +2,10 @@ package com.bifee.projectmanagement.management.api;
 
 import com.bifee.projectmanagement.identity.infrastructure.security.UserDetailsImpl;
 import com.bifee.projectmanagement.management.application.TaskService;
-import com.bifee.projectmanagement.management.application.dto.CommentResponse;
-import com.bifee.projectmanagement.management.application.dto.TaskResponse;
-import com.bifee.projectmanagement.management.application.dto.CommentRequest;
-import com.bifee.projectmanagement.management.application.dto.UpdateTaskRequest;
+import com.bifee.projectmanagement.management.application.dto.comment.CommentResponse;
+import com.bifee.projectmanagement.management.application.dto.task.TaskResponse;
+import com.bifee.projectmanagement.management.application.dto.comment.CommentRequest;
+import com.bifee.projectmanagement.management.application.dto.task.UpdateTaskRequest;
 import com.bifee.projectmanagement.management.domain.comment.Comment;
 import com.bifee.projectmanagement.management.domain.task.Task;
 import jakarta.validation.Valid;
@@ -58,6 +58,7 @@ public class TaskController {
     }
 
     @DeleteMapping("/{taskId}/comments/{commentId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public TaskResponse removeCommentFromTask(@PathVariable Long taskId, @PathVariable Long commentId, @AuthenticationPrincipal UserDetailsImpl userDetails){
         Long requesterId = userDetails.user().id();
         Task task = taskService.removeComment(taskId, commentId, requesterId);

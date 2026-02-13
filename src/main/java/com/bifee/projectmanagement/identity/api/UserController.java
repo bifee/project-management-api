@@ -2,9 +2,9 @@ package com.bifee.projectmanagement.identity.api;
 
 
 import com.bifee.projectmanagement.identity.application.UserService;
-import com.bifee.projectmanagement.identity.application.dto.UpdatePasswordRequest;
-import com.bifee.projectmanagement.identity.application.dto.UpdateUserProfileRequest;
-import com.bifee.projectmanagement.identity.application.dto.UserResponse;
+import com.bifee.projectmanagement.identity.application.dto.user.UpdatePasswordRequest;
+import com.bifee.projectmanagement.identity.application.dto.user.UpdateUserProfileRequest;
+import com.bifee.projectmanagement.identity.application.dto.user.UserResponse;
 import com.bifee.projectmanagement.identity.domain.User;
 import com.bifee.projectmanagement.identity.domain.UserRole;
 import com.bifee.projectmanagement.identity.infrastructure.security.UserDetailsImpl;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/api/users")
 public class UserController {
     private final UserService userService;
 
@@ -31,7 +31,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public UserResponse getUserById(Long userId){
+    public UserResponse getUserById(@PathVariable Long userId){
         User user = userService.getUserById(userId);
         return UserResponse.from(user);
     }

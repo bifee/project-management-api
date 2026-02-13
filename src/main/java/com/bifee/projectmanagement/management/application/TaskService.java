@@ -1,8 +1,8 @@
 package com.bifee.projectmanagement.management.application;
 
-import com.bifee.projectmanagement.management.application.dto.CreateTaskRequest;
-import com.bifee.projectmanagement.management.application.dto.CommentRequest;
-import com.bifee.projectmanagement.management.application.dto.UpdateTaskRequest;
+import com.bifee.projectmanagement.management.application.dto.task.CreateTaskRequest;
+import com.bifee.projectmanagement.management.application.dto.comment.CommentRequest;
+import com.bifee.projectmanagement.management.application.dto.task.UpdateTaskRequest;
 import com.bifee.projectmanagement.management.domain.comment.Comment;
 import com.bifee.projectmanagement.management.domain.project.Project;
 import com.bifee.projectmanagement.management.domain.task.Task;

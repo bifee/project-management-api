@@ -1,10 +1,9 @@
 package com.bifee.projectmanagement.identity.api;
 
 import com.bifee.projectmanagement.identity.application.AuthUserService;
-import com.bifee.projectmanagement.identity.application.dto.AuthenticationResponse;
-import com.bifee.projectmanagement.identity.application.dto.UserLoginRequest;
-import com.bifee.projectmanagement.identity.application.dto.UserRegistrationRequest;
-import com.bifee.projectmanagement.identity.domain.User;
+import com.bifee.projectmanagement.identity.application.dto.auth.AuthenticationResponse;
+import com.bifee.projectmanagement.identity.application.dto.auth.UserLoginRequest;
+import com.bifee.projectmanagement.identity.application.dto.auth.UserRegistrationRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;

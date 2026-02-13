@@ -1,4 +1,4 @@
-package com.bifee.projectmanagement.identity.application.dto;
+package com.bifee.projectmanagement.identity.application.dto.auth;
 
 import com.bifee.projectmanagement.identity.domain.Email;
 import com.bifee.projectmanagement.identity.domain.Password;

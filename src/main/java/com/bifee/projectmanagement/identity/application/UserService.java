@@ -1,9 +1,7 @@
 package com.bifee.projectmanagement.identity.application;
 
-import com.bifee.projectmanagement.identity.application.dto.UpdatePasswordRequest;
-import com.bifee.projectmanagement.identity.application.dto.UpdateUserProfileRequest;
-import com.bifee.projectmanagement.identity.application.dto.UserLoginRequest;
-import com.bifee.projectmanagement.identity.application.dto.UserRegistrationRequest;
+import com.bifee.projectmanagement.identity.application.dto.user.UpdatePasswordRequest;
+import com.bifee.projectmanagement.identity.application.dto.user.UpdateUserProfileRequest;
 import com.bifee.projectmanagement.identity.domain.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

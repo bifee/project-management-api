@@ -1,4 +1,4 @@
-package com.bifee.projectmanagement.identity.application.dto;
+package com.bifee.projectmanagement.identity.application.dto.user;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

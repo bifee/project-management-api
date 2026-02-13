@@ -1,7 +1,5 @@
-package com.bifee.projectmanagement.identity.application.dto;
+package com.bifee.projectmanagement.identity.application.dto.user;
 
-import com.bifee.projectmanagement.identity.domain.Email;
-import com.bifee.projectmanagement.identity.domain.Password;
 import com.bifee.projectmanagement.identity.domain.User;
 import com.bifee.projectmanagement.identity.domain.UserRole;
 

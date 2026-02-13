@@ -1,4 +1,4 @@
-package com.bifee.projectmanagement.management.application.dto;
+package com.bifee.projectmanagement.management.application.dto.comment;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

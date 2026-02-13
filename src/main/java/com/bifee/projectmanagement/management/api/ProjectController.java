@@ -3,7 +3,12 @@ package com.bifee.projectmanagement.management.api;
 import com.bifee.projectmanagement.identity.infrastructure.security.UserDetailsImpl;
 import com.bifee.projectmanagement.management.application.ProjectService;
 import com.bifee.projectmanagement.management.application.TaskService;
-import com.bifee.projectmanagement.management.application.dto.*;
+import com.bifee.projectmanagement.management.application.dto.project.AddMembersRequest;
+import com.bifee.projectmanagement.management.application.dto.project.CreateProjectRequest;
+import com.bifee.projectmanagement.management.application.dto.project.ProjectResponse;
+import com.bifee.projectmanagement.management.application.dto.project.UpdateProjectRequest;
+import com.bifee.projectmanagement.management.application.dto.task.CreateTaskRequest;
+import com.bifee.projectmanagement.management.application.dto.task.TaskResponse;
 import com.bifee.projectmanagement.management.domain.project.Project;
 import com.bifee.projectmanagement.management.domain.task.Task;
 import jakarta.validation.Valid;
@@ -74,10 +79,10 @@ public class ProjectController {
         return ProjectResponse.from(project);
     }
 
-    @PostMapping("/{projectId}/members/{memberId}")
-    public ProjectResponse addMemberToProject(@PathVariable Long projectId, @PathVariable Long memberId, @AuthenticationPrincipal UserDetailsImpl userDetails){
+    @PostMapping("/{projectId}/members/")
+    public ProjectResponse addMembersToProject(@PathVariable Long projectId, @RequestBody @Valid AddMembersRequest request, @AuthenticationPrincipal UserDetailsImpl userDetails){
         Long requesterId = userDetails.user().id();
-        Project project = projectService.addMemberToProject(memberId, projectId, requesterId);
+        Project project = projectService.addMembersToProject(request, projectId, requesterId);
         return ProjectResponse.from(project);
     }
 

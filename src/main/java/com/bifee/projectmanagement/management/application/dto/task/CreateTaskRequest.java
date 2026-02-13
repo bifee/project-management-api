@@ -1,11 +1,8 @@
-package com.bifee.projectmanagement.management.application.dto;
+package com.bifee.projectmanagement.management.application.dto.task;
 
-import com.bifee.projectmanagement.management.domain.comment.Comment;
 import com.bifee.projectmanagement.management.domain.task.TaskPriority;
 import com.bifee.projectmanagement.management.domain.task.TaskStatus;
 
-import java.time.Instant;
-import java.util.List;
 import java.util.Set;
 
 public record CreateTaskRequest(

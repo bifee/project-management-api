@@ -1,8 +1,6 @@
-package com.bifee.projectmanagement.management.application.dto;
+package com.bifee.projectmanagement.management.application.dto.task;
 
 import com.bifee.projectmanagement.management.domain.comment.Comment;
-import com.bifee.projectmanagement.management.domain.project.Project;
-import com.bifee.projectmanagement.management.domain.project.ProjectStatus;
 import com.bifee.projectmanagement.management.domain.task.Task;
 import com.bifee.projectmanagement.management.domain.task.TaskPriority;
 import com.bifee.projectmanagement.management.domain.task.TaskStatus;

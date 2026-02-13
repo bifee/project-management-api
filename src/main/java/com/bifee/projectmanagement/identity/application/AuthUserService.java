@@ -1,10 +1,9 @@
 package com.bifee.projectmanagement.identity.application;
 
 
-import com.bifee.projectmanagement.identity.application.dto.AuthenticationResponse;
-import com.bifee.projectmanagement.identity.application.dto.UserLoginRequest;
-import com.bifee.projectmanagement.identity.application.dto.UserRegistrationRequest;
-import com.bifee.projectmanagement.identity.domain.Email;
+import com.bifee.projectmanagement.identity.application.dto.auth.AuthenticationResponse;
+import com.bifee.projectmanagement.identity.application.dto.auth.UserLoginRequest;
+import com.bifee.projectmanagement.identity.application.dto.auth.UserRegistrationRequest;
 import com.bifee.projectmanagement.identity.domain.User;
 import com.bifee.projectmanagement.identity.domain.UserRepository;
 import com.bifee.projectmanagement.identity.infrastructure.security.TokenService;
