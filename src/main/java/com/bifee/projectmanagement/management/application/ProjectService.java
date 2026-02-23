@@ -6,6 +6,8 @@ import com.bifee.projectmanagement.management.application.dto.project.UpdateProj
 import com.bifee.projectmanagement.management.domain.project.Project;
 import com.bifee.projectmanagement.management.domain.project.ProjectRepository;
 import com.bifee.projectmanagement.management.domain.project.ProjectStatus;
+import com.bifee.projectmanagement.shared.ForbiddenException;
+import com.bifee.projectmanagement.shared.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +38,7 @@ public class ProjectService {
 
     @Transactional(readOnly = true)
     public Project getProjectById(Long id) {
-        return projectRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Project not found with id: " + id));
+        return projectRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Project", id));
     }
 
     @Transactional(readOnly = true)
@@ -117,7 +119,7 @@ public class ProjectService {
     public void deleteProject(Long id, Long requesterId) {
         Project project = getProjectById(id);
         if(!project.isOwner(requesterId)){
-            throw new IllegalArgumentException("Only owner can delete project");
+            throw new ForbiddenException("Only owner can delete project");
         }
         projectRepository.deleteById(id);
     }

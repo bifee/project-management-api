@@ -3,6 +3,10 @@ package com.bifee.projectmanagement.identity.application;
 import com.bifee.projectmanagement.identity.application.dto.user.UpdatePasswordRequest;
 import com.bifee.projectmanagement.identity.application.dto.user.UpdateUserProfileRequest;
 import com.bifee.projectmanagement.identity.domain.*;
+import com.bifee.projectmanagement.shared.DuplicateResourceException;
+import com.bifee.projectmanagement.shared.ForbiddenException;
+import com.bifee.projectmanagement.shared.PasswordMismatchException;
+import com.bifee.projectmanagement.shared.ResourceNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,14 +27,14 @@ public class UserService {
 
     @Transactional
     public User getUserById(Long userId){
-        return userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("User not found with id: " + userId));
+        return userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", userId));
     }
 
     @Transactional
     public List<User> getAllUsers(Long requesterId){
         User requester = getUserById(requesterId);
         if(!requester.role().equals(UserRole.ADMIN)){
-            throw new IllegalArgumentException("Only admin can get all users");
+            throw new ForbiddenException("Only admin can get all users");
         }
         return userRepository.findAll();
     }
@@ -53,7 +57,7 @@ public class UserService {
     @Transactional
     public User updateProfile(Long userId, UpdateUserProfileRequest request, Long requesterId){
         if(!requesterId.equals(userId)){
-            throw new IllegalArgumentException("Only user can update his profile");
+            throw new ForbiddenException("Only user can update his profile");
         }
         User user = getUserById(userId);
         User.Builder builder = user.mutate();
@@ -62,7 +66,7 @@ public class UserService {
         }
         if (request.email() != null && !request.email().equals(user.email().value())) {
             if(userRepository.existsByEmail(request.email())){
-                throw new IllegalArgumentException("Email already exists");
+                throw new DuplicateResourceException("User", "email", request.email());
             }
             builder.withEmail(new Email(request.email()));
         }
@@ -72,21 +76,21 @@ public class UserService {
     @Transactional
     public void updatePassword(Long userId, UpdatePasswordRequest request, Long requesterId){
         if(!userId.equals(requesterId)){
-            throw new IllegalArgumentException("Only user can update his password");
+            throw new ForbiddenException("Only user can update his password");
         }
 
         if(!request.newPasswordsMatch()){
-            throw new IllegalArgumentException("Passwords do not match");
+            throw new PasswordMismatchException("Passwords do not match");
         }
 
-        User user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("User not found with id: " + userId));
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", userId));
 
         if(!passwordEncoder.matches(request.currentPassword(), user.password().value())){
-            throw new IllegalArgumentException("Current password does not match");
+            throw new PasswordMismatchException("Current password does not match");
         }
 
         if(passwordEncoder.matches(request.newPassword(), user.password().value())){
-           throw new IllegalArgumentException("New password cannot be the same as the current password");
+           throw new PasswordMismatchException("New password cannot be the same as the current password");
         }
 
         var newEncodedPassword = passwordEncoder.encode(request.newPassword());
@@ -98,10 +102,10 @@ public class UserService {
     public User updateUserRole(Long userId, UserRole newRole, Long adminId){
         User user = getUserById(adminId);
         if(user.role() != UserRole.ADMIN){
-            throw new IllegalArgumentException("Only admin can change roles");
+            throw new ForbiddenException("Only admin can change roles");
         }
         if(adminId.equals(userId)){
-            throw new IllegalArgumentException("Admin cannot be update own role");
+            throw new ForbiddenException("Admin cannot be update own role");
         }
         User updatedUser = user.mutate().withRole(newRole).build();
         return userRepository.save(updatedUser);
@@ -111,11 +115,11 @@ public class UserService {
     public User activateUser(Long userId, Long adminId) {
         User admin = getUserById(adminId);
         if (!admin.isAdmin()) {
-            throw new IllegalArgumentException("Only admins can activate users");
+            throw new ForbiddenException("Only admins can activate users");
         }
         User user = getUserById(userId);
         if (user.isActive()) {
-            throw new IllegalArgumentException("User is already active");
+            throw new ForbiddenException("User is already active");
         }
         User activatedUser = user.mutate()
                 .withActive(true)
@@ -128,22 +132,19 @@ public class UserService {
         User requester = getUserById(requesterId);
         User user = getUserById(userId);
 
-        // Validar permissão: Admin ou próprio usuário
         boolean isAdmin = requester.isAdmin();
         boolean isOwner = userId.equals(requesterId);
 
         if (!isAdmin && !isOwner) {
-            throw new IllegalArgumentException("Only admins or the user can deactivate the account");
+            throw new ForbiddenException("Only admins or the user can deactivate the account");
         }
 
-        // Admin não pode desativar própria conta
         if (isAdmin && isOwner) {
-            throw new IllegalArgumentException("Admins cannot deactivate their own account");
+            throw new ForbiddenException("Admins cannot deactivate their own account");
         }
 
-        // Já está inativo
         if (!user.isActive()) {
-            throw new IllegalArgumentException("User is already inactive");
+            throw new ForbiddenException("User is already inactive");
         }
 
         User deactivatedUser = user.mutate()
@@ -158,11 +159,11 @@ public class UserService {
         User admin = getUserById(adminId);
 
         if (!admin.isAdmin()) {
-            throw new IllegalArgumentException("Only admins can permanently delete users");
+            throw new ForbiddenException("Only admins can permanently delete users");
         }
 
         if (userId.equals(adminId)) {
-            throw new IllegalArgumentException("Admins cannot delete themselves");
+            throw new ForbiddenException("Admins cannot delete themselves");
         }
 
         userRepository.deleteById(userId);
