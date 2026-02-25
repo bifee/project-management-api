@@ -10,6 +10,7 @@ import com.bifee.projectmanagement.management.domain.task.TaskRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -91,7 +92,7 @@ public class TaskService {
                 .withContent(request.content())
                 .withCreator(requesterId).build();
 
-        List<Comment> comment_list = task.comments();
+        List<Comment> comment_list = new ArrayList<>(task.comments());
         comment_list.add(comment);
         Task updatedTask = task.mutate().withComments(comment_list).build();
 
