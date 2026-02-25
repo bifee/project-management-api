@@ -8,6 +8,7 @@ import com.bifee.projectmanagement.identity.domain.User;
 import com.bifee.projectmanagement.identity.domain.UserRepository;
 import com.bifee.projectmanagement.identity.infrastructure.security.TokenService;
 import com.bifee.projectmanagement.identity.infrastructure.security.UserDetailsImpl;
+import com.bifee.projectmanagement.shared.DuplicateResourceException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -42,7 +43,7 @@ public class AuthUserService {
 
     public AuthenticationResponse register(UserRegistrationRequest dto) {
         if(userRepository.existsByEmail(dto.email())) {
-            throw new IllegalArgumentException("Email already in use");
+            throw new DuplicateResourceException("User", "email", dto.email());
         }
         String encodedPassword = passwordEncoder.encode(dto.password());
         User userToSave = dto.toDomain(encodedPassword);
