@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 
 @Service
@@ -22,12 +23,11 @@ public class TokenService {
     public String generateToken(User user) {
         try{
            Algorithm algorithm = Algorithm.HMAC256(secret);
-           String token = JWT.create()
-                   .withIssuer("auth-api")
-                   .withSubject(user.email().value())
-                   .withExpiresAt(this.genExpirationDate())
-                   .sign(algorithm);
-           return token;
+            return JWT.create()
+                    .withIssuer("auth-api")
+                    .withSubject(user.email().value())
+                    .withExpiresAt(genExpirationDate())
+                    .sign(algorithm);
         } catch (JWTCreationException exception) {
             throw new RuntimeException("Error creating JWT", exception);
         }
@@ -40,11 +40,11 @@ public class TokenService {
             return JWT.require(algorithm).withIssuer("auth-api").build().verify(token).getSubject();
         }
         catch (JWTVerificationException exception) {
-            return null;
+            throw new RuntimeException("Error validating JWT", exception);
         }
     }
 
     private Instant genExpirationDate() {
-        return LocalDateTime.now().plusHours(2).toInstant(java.time.ZoneOffset.UTC);
+        return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00"));
     }
 }

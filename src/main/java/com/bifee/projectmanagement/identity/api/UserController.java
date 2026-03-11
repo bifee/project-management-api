@@ -39,7 +39,9 @@ public class UserController {
     @GetMapping
     public List<UserResponse> getAllUsers(@AuthenticationPrincipal UserDetailsImpl userDetails){
         Long requesterId = userDetails.user().id();
+        System.out.println("Requester ID: " + requesterId);
         List<User> users = userService.getAllUsers(requesterId);
+        System.out.println("Users retrieved: " + users.size());
         return UserResponse.fromList(users);
     }
 
