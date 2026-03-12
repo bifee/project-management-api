@@ -1,35 +1,41 @@
-package com.bifee.projectmanagement.identity.api;
+package com.bifee.projectmanagement.management.api;
 import com.bifee.projectmanagement.identity.application.dto.auth.UserLoginRequest;
 import com.bifee.projectmanagement.identity.application.dto.auth.UserRegistrationRequest;
+import com.bifee.projectmanagement.identity.application.dto.user.UpdatePasswordRequest;
+import com.bifee.projectmanagement.identity.application.dto.user.UpdateUserProfileRequest;
 import com.bifee.projectmanagement.identity.domain.UserRole;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import tools.jackson.databind.ObjectMapper;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
-class AuthControllerTest {
+class ProjectControllerTest {
     private final MockMvc mockMvc;
+
     private final ObjectMapper objectMapper;
 
-    public AuthControllerTest(@Autowired MockMvc mockMvc) {
+    private String token;
+
+    private Long userId;
+
+    public ProjectControllerTest(@Autowired MockMvc mockMvc) {
         this.mockMvc = mockMvc;
         this.objectMapper = new ObjectMapper();
+        this.token = "";
     }
 
-    @Test
+    @BeforeEach
     void setUp() throws Exception {
         var adminRegisterRequest = new UserRegistrationRequest(
                 "Manager",
@@ -60,12 +66,61 @@ class AuthControllerTest {
         var devLoginRequest = new UserLoginRequest("dev@test.com", "DevPassword@123");
 
 
-        mockMvc.perform(post("/auth/login")
+        MvcResult result = mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(devLoginRequest)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String response = result.getResponse().getContentAsString();
+        this.token = objectMapper.readTree(response).get("token").asText();
+
+    }
+
+    @Test
+    void getProjectById() throws Exception {
+        mockMvc.perform(get("/api/projects/1")
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk());
     }
 
+    @Test
+    void getProjectsByOwnerId() throws Exception{
+    }
 
+    @Test
+    void getMyProjects() throws Exception{
+    }
 
+    @Test
+    void searchProjects() throws Exception{
+    }
+
+    @Test
+    void getAllTasksByProjectId() throws Exception{
+    }
+
+    @Test
+    void createProject() throws Exception{
+    }
+
+    @Test
+    void deleteProject() throws Exception{
+    }
+
+    @Test
+    void updateProject() throws Exception{
+    }
+
+    @Test
+    void addMembersToProject() throws Exception{
+    }
+
+    @Test
+    void removeMemberFromProject() throws Exception{
+    }
+
+    @Test
+    void createTask() throws Exception{
+    }
 }
