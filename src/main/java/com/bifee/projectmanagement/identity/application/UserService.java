@@ -100,8 +100,9 @@ public class UserService {
 
     @Transactional
     public User updateUserRole(Long userId, UserRole newRole, Long adminId){
-        User user = getUserById(adminId);
-        if(user.role() != UserRole.ADMIN){
+        User admin = getUserById(adminId);
+        User user = getUserById(userId);
+        if(admin.role() != UserRole.ADMIN){
             throw new ForbiddenException("Only admin can change roles");
         }
         if(adminId.equals(userId)){

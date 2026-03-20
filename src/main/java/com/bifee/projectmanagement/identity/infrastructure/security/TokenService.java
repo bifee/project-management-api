@@ -40,7 +40,7 @@ public class TokenService {
             return JWT.require(algorithm).withIssuer("auth-api").build().verify(token).getSubject();
         }
         catch (JWTVerificationException exception) {
-            throw new RuntimeException("Error validating JWT", exception);
+            return null;
         }
     }
 
