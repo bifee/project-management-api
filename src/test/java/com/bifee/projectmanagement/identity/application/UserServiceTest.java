@@ -115,6 +115,7 @@ class UserServiceTest {
 
             assertEquals("Novo Nome", result.name());
             assertEquals("new@test.com", result.email().value());
+            verify(userRepository).save(any(User.class));
         }
 
         @Test
@@ -124,7 +125,54 @@ class UserServiceTest {
 
             assertThrows(ForbiddenException.class, () ->
                     userService.updateProfile(2L, request, 1L));
+            verify(userRepository, never()).save(any(User.class));
         }
+    }
+
+    @Nested
+    @DisplayName("scenarie: Update Role")
+    class UpdateRoleTest {
+        @Test
+        @DisplayName("Admin deve atualizar o cargo de outro usuário com sucesso")
+        void shouldUpdateRole_WhenAdminIsRequester() {
+            User targetUser = new User.Builder()
+                    .copy(dev)
+                    .withId(3L)
+                    .withRole(UserRole.VIEWER)
+                    .build();
+
+            when(userRepository.findById(1L)).thenReturn(Optional.of(admin));
+            when(userRepository.findById(3L)).thenReturn(Optional.of(targetUser));
+            when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArguments()[0]);
+
+            User result = userService.updateUserRole(3L, UserRole.DEV, 1L);
+
+            assertNotNull(result);
+            assertEquals(3L, result.id());
+            assertEquals(UserRole.DEV, result.role());
+
+            verify(userRepository).save(argThat(u ->
+                    u.id().equals(3L) && u.role() == UserRole.DEV
+            ));
+        }
+
+        @Test
+        @DisplayName("Admin should not be able to update their own role")
+        void shouldThrowException_WhenAdminTriesToUpdateOwnRole() {
+            when(userRepository.findById(1L)).thenReturn(Optional.of(admin));
+            assertThrows(ForbiddenException.class, () ->
+                    userService.updateUserRole(1L, UserRole.DEV, 1L));
+            verify(userRepository, never()).save(any(User.class));
+        }
+
+        @Test
+        @DisplayName("Non-admin should not be able to update any user's role")
+        void shouldThrowException_WhenNonAdminTriesToUpdateRole() {
+            when(userRepository.findById(2L)).thenReturn(Optional.of(dev));
+            assertThrows(ForbiddenException.class, () ->
+                    userService.updateUserRole(2L, UserRole.DEV, 2L));
+        }
+
     }
 
     @Nested
@@ -147,6 +195,16 @@ class UserServiceTest {
         }
 
         @Test
+        @DisplayName("Should throw ForbiddenException when user tries to update another user's password")
+        void shouldThrowException_WhenUserTriesToUpdateAnotherUsersPassword() {
+            UpdatePasswordRequest request = new UpdatePasswordRequest(
+                    "Current123", "NewPass@123", "NewPass@123");
+            assertThrows(ForbiddenException.class, () ->
+                    userService.updatePassword(2L, request, 1L));
+            verify(userRepository, never()).save(any(User.class));
+        }
+
+        @Test
         @DisplayName("Deve lançar PasswordMismatchException quando a nova senha e a confirmação são diferentes")
         void shouldThrowException_WhenNewPasswordsDoNotMatch() {
             UpdatePasswordRequest request = new UpdatePasswordRequest(
@@ -154,7 +212,77 @@ class UserServiceTest {
 
             assertThrows(PasswordMismatchException.class, () ->
                     userService.updatePassword(2L, request, 2L));
+            verify(userRepository, never()).save(any(User.class));
         }
+
+        @Test
+        @DisplayName("Should throw PasswordMismatchException when current password is incorrect")
+        void shouldThrowException_WhenCurrentPasswordIsIncorrect() {
+            UpdatePasswordRequest request = new UpdatePasswordRequest(
+                    "Current123", "NewPass1", "NewPass1");
+            when(userRepository.findById(2L)).thenReturn(Optional.of(dev));
+            assertThrows(PasswordMismatchException.class, () ->
+                    userService.updatePassword(2L, request, 2L));
+            verify(userRepository, never()).save(any(User.class));
+        }
+
+        @Test
+        @DisplayName("Should throw PasswordMismatchException when new password is the same as the current password")
+        void shouldThrowException_WhenNewPasswordIsSameAsCurrentPassword() {
+            UpdatePasswordRequest request = new UpdatePasswordRequest(
+                    "EncodedPassword456", "EncodedPassword456", "EncodedPassword456");
+            when(userRepository.findById(2L)).thenReturn(Optional.of(dev));
+            assertThrows(PasswordMismatchException.class, () ->
+                    userService.updatePassword(2L, request, 2L));
+            verify(userRepository, never()).save(any(User.class));
+        }
+    }
+
+    @Nested
+    @DisplayName("Cenário: Ativação de Usuário")
+    class ActivationTests {
+        @Test
+        @DisplayName("Admin deve ativar um usuário inativo com sucesso")
+        void shouldActivateUser_WhenAdminIsRequester() {
+            User inactiveUser = new User.Builder()
+                    .copy(dev)
+                    .withId(3L)
+                    .withActive(false)
+                    .build();
+
+            when(userRepository.findById(1L)).thenReturn(Optional.of(admin));
+            when(userRepository.findById(3L)).thenReturn(Optional.of(inactiveUser));
+
+            when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArguments()[0]);
+
+            User result = userService.activateUser(3L, 1L);
+
+            assertNotNull(result);
+            assertTrue(result.isActive(), "O usuário deveria estar ativo após a chamada");
+
+            verify(userRepository).save(argThat(User::isActive));
+            verify(userRepository, times(2)).findById(anyLong());
+        }
+
+        @Test
+        @DisplayName("Admin should not be able to activate an already active user")
+        void shouldThrowException_WhenAdminTriesToActivateAlreadyActiveUser() {
+            when(userRepository.findById(1L)).thenReturn(Optional.of(admin));
+            when(userRepository.findById(2L)).thenReturn(Optional.of(dev));
+            assertThrows(ForbiddenException.class, () ->
+                    userService.activateUser(2L, 1L));
+            verify(userRepository, never()).save(any(User.class));
+        }
+
+        @Test
+        @DisplayName("Non-admin should not be able to activate any user")
+        void shouldThrowException_WhenNonAdminTriesToActivateUser() {
+            when(userRepository.findById(2L)).thenReturn(Optional.of(dev));
+            assertThrows(ForbiddenException.class, () ->
+                    userService.activateUser(2L, 2L));
+            verify(userRepository, never()).save(any(User.class));
+        }
+
     }
 
     @Nested
@@ -177,9 +305,44 @@ class UserServiceTest {
         @DisplayName("Admin não deve conseguir desativar a própria conta")
         void shouldThrowException_WhenAdminTriesToDeactivateSelf() {
             when(userRepository.findById(1L)).thenReturn(Optional.of(admin));
-
             assertThrows(ForbiddenException.class, () ->
                     userService.deactivateUser(1L, 1L));
+            verify(userRepository, never()).save(any(User.class));
         }
+
+        @Test
+        @DisplayName("Non-admin should not be able to deactivate any user")
+        void shouldThrowException_WhenNonAdminTriesToDeactivateUser() {
+            User activeUser = new User.Builder()
+                    .copy(dev)
+                    .withId(3L)
+                    .withActive(true)
+                    .build();
+
+            when(userRepository.findById(2L)).thenReturn(Optional.of(dev));
+            when(userRepository.findById(3L)).thenReturn(Optional.of(activeUser));
+            assertThrows(ForbiddenException.class, () ->
+                    userService.deactivateUser(3L, 2L));
+            verify(userRepository, never()).save(any(User.class));
+        }
+
+        @Test
+        @DisplayName("Should throw ForbiddenException when tries to deactivate a inactive user")
+        void shouldThrowException_WhenTriesToDeactivateInactiveUser() {
+                User inactiveUser = new User.Builder()
+                        .copy(dev)
+                        .withId(3L)
+                        .withActive(false)
+                        .build();
+
+                when(userRepository.findById(1L)).thenReturn(Optional.of(admin));
+                when(userRepository.findById(3L)).thenReturn(Optional.of(inactiveUser));
+
+                assertThrows(ForbiddenException.class, () ->
+                        userService.deactivateUser(3L, 1L));
+                verify(userRepository, never()).save(any(User.class));
+        }
+
+
     }
 }
