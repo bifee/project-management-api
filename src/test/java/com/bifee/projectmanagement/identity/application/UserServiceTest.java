@@ -77,19 +77,26 @@ class UserServiceTest {
         @DisplayName("Deve lançar ResourceNotFoundException quando ID não existe")
         void shouldThrowException_WhenIdDoesNotExist() {
             when(userRepository.findById(99L)).thenReturn(Optional.empty());
-
             assertThrows(ResourceNotFoundException.class, () -> userService.getUserById(99L));
         }
 
         @Test
         @DisplayName("Deve retornar todos usuarios criados")
-        void shouldReturnAllUsers_WhenResquesterIsAdmin() {
+        void shouldReturnAllUsers_WhenRequesterIsAdmin() {
             when(userRepository.findById(1L)).thenReturn(Optional.of(admin));
-            when(userRepository.findAll()).thenReturn(java.util.List.of(admin, dev));
+            when(userRepository.findAll()).thenReturn(List.of(admin, dev));
 
             List<User> userList = userService.getAllUsers(1L);
             assertEquals(2, userList.size());
             verify(userRepository).findAll();
+        }
+
+        @Test
+        @DisplayName("Should throw ForbiddenException when Requester is not Admin")
+        void shouldThrowException_WhenRequesterIsNotAdmin() {
+            when(userRepository.findById(2L)).thenReturn(Optional.of(dev));
+            assertThrows(ForbiddenException.class, () -> userService.getAllUsers(2L));
+            verify(userRepository, never()).findAll();
         }
     }
 

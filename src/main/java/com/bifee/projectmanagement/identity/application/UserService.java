@@ -54,6 +54,7 @@ public class UserService {
     public List<User> getUsersByName(String name){
         return userRepository.findByName(name);
     }
+
     @Transactional
     public User updateProfile(Long userId, UpdateUserProfileRequest request, Long requesterId){
         if(!requesterId.equals(userId)){
