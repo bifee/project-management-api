@@ -55,7 +55,7 @@ public class ProjectService {
     public Project addMembersToProject(AddMembersRequest request, Long projectId, Long requesterId) {
         Project project = getProjectById(projectId);
         if(!project.isOwner(requesterId)){
-            throw new IllegalArgumentException("Only owner can add members to project");
+            throw new ForbiddenException("Only owner can add members to project");
         }
 
         Set<Long> alreadyMembers = request.userIds().stream()
@@ -63,7 +63,7 @@ public class ProjectService {
                 .collect(Collectors.toSet());
 
         if (!alreadyMembers.isEmpty()) {
-            throw new IllegalArgumentException(
+            throw new ForbiddenException(
                     "Users already members: " + alreadyMembers
             );
         }
@@ -79,13 +79,13 @@ public class ProjectService {
     public Project removeMemberFromProject(Long memberId, Long projectId, Long requesterId) {
         Project project = getProjectById(projectId);
         if(!project.isOwner(requesterId)){
-            throw new IllegalArgumentException("Only owner can remove members from project");
+            throw new ForbiddenException("Only owner can remove members from project");
         }
         if (!project.isMember(memberId)) {
-            throw new IllegalArgumentException("Member not in project");
+            throw new ForbiddenException("Member not in project");
         }
         if (project.ownerId().equals(memberId)) {
-            throw new IllegalArgumentException("Cannot remove owner from project");
+            throw new ForbiddenException("Cannot remove owner from project");
         }
 
         var updatedMembers = new HashSet<>(project.membersIds());
@@ -100,7 +100,7 @@ public class ProjectService {
     public Project updateProject(Long ProjectId, UpdateProjectRequest dto, Long requesterId) {
         Project project = getProjectById(ProjectId);
         if (!project.isOwner(requesterId)) {
-            throw new IllegalArgumentException("Only owner can update project");
+            throw new ForbiddenException("Only owner can update project");
         }
         Project.Builder builder = project.mutate();
         if(dto.title() != null){
