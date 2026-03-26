@@ -109,7 +109,7 @@ class ProjectServiceTest {
         @Test
         @DisplayName("Should throw IllegalArgumentException when user is already a member")
         void shouldThrowException_WhenUserIsAlreadyMember() {
-            AddMembersRequest request = new AddMembersRequest(Set.of(ownerId)); // Owner is member by default
+            AddMembersRequest request = new AddMembersRequest(Set.of(ownerId));
             when(projectRepository.findById(projectId)).thenReturn(Optional.of(sampleProject));
 
             assertThrows(ForbiddenException.class, () ->

@@ -39,7 +39,6 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        // Initializing test data using Value Objects and Builders
         admin = new User.Builder()
                 .withId(1L)
                 .withName("Admin User")
@@ -110,7 +109,6 @@ class UserServiceTest {
             UpdateUserProfileRequest request = new UpdateUserProfileRequest("new@test.com", "New Name");
             when(userRepository.findById(2L)).thenReturn(Optional.of(dev));
             when(userRepository.existsByEmail("new@test.com")).thenReturn(false);
-            // Mocking the save method to return the object being saved (mirror behavior)
             when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArguments()[0]);
 
             User result = userService.updateProfile(2L, request, 2L);
@@ -153,7 +151,6 @@ class UserServiceTest {
             assertEquals(3L, result.id());
             assertEquals(UserRole.DEV, result.role());
 
-            // Verifying if the correct user (ID 3) was saved with the new role
             verify(userRepository).save(argThat(u ->
                     u.id().equals(3L) && u.role() == UserRole.DEV
             ));
@@ -259,7 +256,6 @@ class UserServiceTest {
         @Test
         @DisplayName("Non-admin should not be able to deactivate another user's account")
         void shouldThrowException_WhenNonAdminTriesToDeactivateAnotherUser() {
-            // Updated Logic: Requester (ID 2) is NOT the owner of target (ID 3)
             User targetUser = new User.Builder().copy(dev).withId(3L).withActive(true).build();
 
             when(userRepository.findById(2L)).thenReturn(Optional.of(dev));
