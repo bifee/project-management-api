@@ -1,11 +1,13 @@
 package com.bifee.projectmanagement.management.infrastructure;
 
+import com.bifee.projectmanagement.management.application.dto.comment.CommentResponse;
 import com.bifee.projectmanagement.management.domain.task.Task;
 import com.bifee.projectmanagement.management.domain.task.TaskPriority;
 import com.bifee.projectmanagement.management.domain.task.TaskStatus;
 import jakarta.persistence.*;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -32,7 +34,7 @@ public class TaskEntity {
     private Instant updatedAt;
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<CommentEntity> comments;
+    private List<CommentEntity> comments = new ArrayList<>();
 
     public TaskEntity() {
     }
@@ -70,15 +72,30 @@ public class TaskEntity {
     }
 
     protected static TaskEntity toEntity(Task task){
-        return new TaskEntity(task.id(),
+        List<CommentEntity> comments = new ArrayList<>();
+        if(task.comments() != null)
+            comments = task.comments().stream().map(CommentEntity::toEntity).toList();
+        return new TaskEntity(
+                task.id(),
                 task.title(),
                 task.description(),
-                task.status(), task.priority(), task.assignedUsersId(), task.projectId(), task.createdAt(), task.updatedAt(), task.comments().stream().map(CommentEntity::toEntity).toList());
+                task.status(),
+                task.priority(),
+                task.assignedUsersId(),
+                task.projectId(),
+                task.createdAt(),
+                task.updatedAt(),
+                comments
+        );
     }
 
 
     private void setComments(List<CommentEntity> comments) {
-        this.comments.clear();
+        if (this.comments == null) {
+            this.comments = new ArrayList<>();
+        } else {
+            this.comments.clear();
+        }
         if (comments != null) {
             comments.forEach(this::addComment);
         }

@@ -121,6 +121,7 @@ public record Task (
             if (priority == null){
                 priority = TaskPriority.LOW;
             }
+            if (assignedUsersId == null || assignedUsersId.isEmpty()) assignedUsersId = Set.of();
             if (createdAt == null) createdAt = Instant.now();
             if (updatedAt == null) updatedAt = Instant.now();
         }

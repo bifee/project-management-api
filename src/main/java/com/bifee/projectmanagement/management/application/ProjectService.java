@@ -30,8 +30,8 @@ public class ProjectService {
         Project project = new Project.Builder()
                 .withTitle(dto.title())
                 .withDescription(dto.description())
-                .withOwnerId(creatorId).
-                withProjectStatus(ProjectStatus.IN_PROGRESS)
+                .withOwnerId(creatorId)
+                .withProjectStatus(ProjectStatus.IN_PROGRESS)
                 .build();
         return projectRepository.save(project);
     }

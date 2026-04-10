@@ -40,18 +40,30 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public List<User> getActiveUsers(){
+    public List<User> getActiveUsers(Long requesterId){
+        User requester = getUserById(requesterId);
+        if(!requester.role().equals(UserRole.ADMIN)){
+            throw new ForbiddenException("Only admin can get all users");
+        }
         return userRepository.findByIsActiveTrue();
     }
 
     @Transactional
-    public List<User> getUsersByRole(UserRole role){
+    public List<User> getUsersByRole(Long requesterId, UserRole role){
+        User requester = getUserById(requesterId);
+        if(!requester.role().equals(UserRole.ADMIN)){
+            throw new ForbiddenException("Only admin can get all users");
+        }
         return userRepository.findByRole(role);
 
     }
 
     @Transactional
-    public List<User> getUsersByName(String name){
+    public List<User> getUsersByName(Long requesterId, String name){
+        User requester = getUserById(requesterId);
+        if(!requester.role().equals(UserRole.ADMIN)){
+            throw new ForbiddenException("Only admin can get all users");
+        }
         return userRepository.findByName(name);
     }
 
