@@ -108,8 +108,11 @@ public class TaskService {
         if (!project.isMember(requesterId)) {
             throw new ForbiddenException("User is not member of project");
         }
-        List<Comment> comment_list = task.comments();
-        comment_list.removeIf(comment -> comment.id().equals(commentId));
+        List<Comment> comment_list = new ArrayList<>(task.comments());
+        boolean removed = comment_list.removeIf(comment -> comment.id().equals(commentId));
+        if (!removed){
+            throw new ResourceNotFoundException("Comment", commentId);
+        }
         Task updatedTask = task.mutate().withComments(comment_list).build();
         return taskRepository.save(updatedTask);
     }
@@ -121,8 +124,21 @@ public class TaskService {
         if (!project.isMember(requesterId)) {
             throw new ForbiddenException("User is not member of project");
         }
-        List<Comment> comment_list = task.comments();
-        comment_list.stream().filter(comment -> comment.id().equals(commentId)).findFirst().ifPresent(comment -> comment.mutate().withContent(request.content()).build());
+
+        List<Comment> comment_list = new ArrayList<>(task.comments());
+
+        Comment founded_comment = comment_list.stream()
+                .filter(comment -> comment.id().equals(commentId))
+                .findFirst().orElseThrow(() -> new ResourceNotFoundException("Comment", commentId));
+
+        if (!founded_comment.creatorId().equals(requesterId)){
+            throw new ForbiddenException("Only comment creator can update comment");
+        }
+
+        Comment updatedComment = founded_comment.mutate().withContent(request.content()).build();
+        System.out.println(updatedComment);
+
+        comment_list.set(comment_list.indexOf(founded_comment), updatedComment);
         Task updatedTask = task.mutate().withComments(comment_list).build();
         return taskRepository.save(updatedTask);
     }
@@ -146,9 +162,5 @@ public class TaskService {
     public int getTaskCommentsCount(Long taskId){
         return getCommentsByTaskId(taskId).size();
     }
-
-
-
-
 
 }

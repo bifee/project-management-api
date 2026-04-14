@@ -1,6 +1,5 @@
 package com.bifee.projectmanagement.management.domain.comment;
 
-import com.bifee.projectmanagement.management.domain.task.Task;
 
 import java.time.Instant;
 
@@ -25,6 +24,9 @@ public record Comment (
         public Builder copy(Comment comment){
             this.id = comment.id();
             this.content = comment.content();
+            this.creatorId = comment.creatorId();
+            this.createdAt = comment.createdAt();
+            this.updatedAt = comment.updatedAt();
             return this;
         }
 

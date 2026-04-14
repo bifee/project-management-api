@@ -2,13 +2,10 @@ package com.bifee.projectmanagement.identity.application;
 
 import com.bifee.projectmanagement.identity.application.dto.auth.AuthenticationResponse;
 import com.bifee.projectmanagement.identity.application.dto.auth.UserRegistrationRequest;
-import com.bifee.projectmanagement.identity.domain.Email;
-import com.bifee.projectmanagement.identity.domain.Password;
 import com.bifee.projectmanagement.identity.domain.User;
 import com.bifee.projectmanagement.identity.domain.UserRepository;
 import com.bifee.projectmanagement.identity.domain.UserRole;
 import com.bifee.projectmanagement.identity.infrastructure.security.TokenService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -32,6 +29,9 @@ class AuthUserServiceTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private TokenService tokenService;
 
     @InjectMocks
     private AuthUserService authService;
