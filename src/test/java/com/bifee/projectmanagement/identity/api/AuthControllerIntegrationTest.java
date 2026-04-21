@@ -15,22 +15,22 @@ class AuthControllerIntegrationTest extends BaseControllerTest {
 
     @Test
     void shouldRegisterUserSuccessfully() throws Exception {
-        UserRegistrationRequest request = new UserRegistrationRequest("Test User", "test@example.com", "password123", UserRole.DEV);
+        UserRegistrationRequest request = new UserRegistrationRequest("Test User", "test@example.com", "Password123@", UserRole.DEV);
 
         mockMvc.perform(post("/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.token").exists())
-                .andExpect(jsonPath("$.user.email").value("test@example.com"));
+                .andExpect(jsonPath("$.username").value("Test User"));
     }
 
     @Test
     void shouldLoginSuccessfully() throws Exception {
         // First register
-        registerAndGetToken("Login User", "login@example.com", "password123");
+        registerAndGetToken("Login User", "login@example.com", "Password123@");
 
-        UserLoginRequest loginRequest = new UserLoginRequest("login@example.com", "password123");
+        UserLoginRequest loginRequest = new UserLoginRequest("login@example.com", "Password123@");
 
         mockMvc.perform(post("/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -47,5 +47,27 @@ class AuthControllerIntegrationTest extends BaseControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void shouldFailRegistrationWithDuplicateEmail() throws Exception {
+        registerAndGetToken("User 1", "duplicate@example.com", "Password123@");
+
+        UserRegistrationRequest request = new UserRegistrationRequest("User 2", "duplicate@example.com", "Password123@", UserRole.DEV);
+
+        mockMvc.perform(post("/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void shouldFailRegistrationWithInvalidData() throws Exception {
+        UserRegistrationRequest request = new UserRegistrationRequest("", "invalid-email", "", null);
+
+        mockMvc.perform(post("/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
     }
 }
