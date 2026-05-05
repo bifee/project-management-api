@@ -2,8 +2,10 @@ package com.bifee.projectmanagement.management.application;
 
 import com.bifee.projectmanagement.management.application.dto.project.AddMembersRequest;
 import com.bifee.projectmanagement.management.application.dto.project.CreateProjectRequest;
+import com.bifee.projectmanagement.management.application.dto.project.UpdateProjectRequest;
 import com.bifee.projectmanagement.management.domain.project.Project;
 import com.bifee.projectmanagement.management.domain.project.ProjectRepository;
+import com.bifee.projectmanagement.management.domain.project.ProjectStatus;
 import com.bifee.projectmanagement.shared.ForbiddenException;
 import com.bifee.projectmanagement.shared.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +17,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -32,26 +36,28 @@ class ProjectServiceTest {
     @InjectMocks
     private ProjectService projectService;
 
+    private Long ownerId = 1L;
+    private Long projectId = 10L;
     private Project sampleProject;
-    private final Long ownerId = 1L;
-    private final Long projectId = 10L;
 
     @BeforeEach
     void setUp() {
         sampleProject = new Project.Builder()
                 .withId(projectId)
-                .withTitle("Project Alpha")
+                .withTitle("Sample Project")
                 .withDescription("Description")
                 .withOwnerId(ownerId)
+                .withMembersIds(new HashSet<>(Set.of(ownerId)))
+                .withProjectStatus(ProjectStatus.IN_PROGRESS)
                 .build();
     }
 
     @Nested
     @DisplayName("Scenario: Project Creation & Retrieval")
-    class BasicOperations {
+    class CreationRetrievalTests {
         @Test
         @DisplayName("Should create project successfully")
-        void shouldCreateProject_WhenDataIsValid() {
+        void shouldCreateProject() {
             CreateProjectRequest request = new CreateProjectRequest("New Project", "Desc");
             when(projectRepository.save(any(Project.class))).thenAnswer(i -> i.getArguments()[0]);
 
@@ -67,13 +73,16 @@ class ProjectServiceTest {
         @DisplayName("Should return project when ID exists")
         void shouldReturnProject_WhenIdExists() {
             when(projectRepository.findById(projectId)).thenReturn(Optional.of(sampleProject));
+
             Project result = projectService.getProjectById(projectId);
-            assertEquals(projectId, result.id());
+
+            assertNotNull(result);
+            assertEquals("Sample Project", result.title());
         }
 
         @Test
-        @DisplayName("Should throw ResourceNotFoundException when project ID does not exist")
-        void shouldThrowException_WhenProjectNotFound() {
+        @DisplayName("Should throw ResourceNotFoundException when ID does not exist")
+        void shouldThrowException_WhenIdDoesNotExist() {
             when(projectRepository.findById(99L)).thenReturn(Optional.empty());
             assertThrows(ResourceNotFoundException.class, () -> projectService.getProjectById(99L));
         }
@@ -83,37 +92,17 @@ class ProjectServiceTest {
     @DisplayName("Scenario: Membership Management")
     class MembershipTests {
         @Test
-        @DisplayName("Should add members successfully when requester is the owner")
-        void shouldAddMembers_WhenRequesterIsOwner() {
+        @DisplayName("Should add members successfully")
+        void shouldAddMembers() {
             AddMembersRequest request = new AddMembersRequest(Set.of(2L, 3L));
             when(projectRepository.findById(projectId)).thenReturn(Optional.of(sampleProject));
             when(projectRepository.save(any(Project.class))).thenAnswer(i -> i.getArguments()[0]);
 
-            Project result = projectService.addMembersToProject(request, projectId, ownerId);
+            Project result = projectService.addMembersToProject(request, projectId);
 
             assertTrue(result.membersIds().contains(2L));
             assertTrue(result.membersIds().contains(3L));
             verify(projectRepository).save(any());
-        }
-
-        @Test
-        @DisplayName("Should throw ForbiddenException when requester is not the owner")
-        void shouldThrowException_WhenAddingMembersAsNonOwner() {
-            AddMembersRequest request = new AddMembersRequest(Set.of(2L));
-            when(projectRepository.findById(projectId)).thenReturn(Optional.of(sampleProject));
-
-            assertThrows(ForbiddenException.class, () ->
-                    projectService.addMembersToProject(request, projectId, 99L));
-        }
-
-        @Test
-        @DisplayName("Should throw IllegalArgumentException when user is already a member")
-        void shouldThrowException_WhenUserIsAlreadyMember() {
-            AddMembersRequest request = new AddMembersRequest(Set.of(ownerId));
-            when(projectRepository.findById(projectId)).thenReturn(Optional.of(sampleProject));
-
-            assertThrows(ForbiddenException.class, () ->
-                    projectService.addMembersToProject(request, projectId, ownerId));
         }
     }
 
@@ -121,18 +110,10 @@ class ProjectServiceTest {
     @DisplayName("Scenario: Project Deletion")
     class DeletionTests {
         @Test
-        @DisplayName("Should delete project when requester is owner")
-        void shouldDeleteProject_WhenRequesterIsOwner() {
-            when(projectRepository.findById(projectId)).thenReturn(Optional.of(sampleProject));
-            projectService.deleteProject(projectId, ownerId);
-            verify(projectRepository).deleteById(sampleProject.id());
-        }
-
-        @Test
-        @DisplayName("Should throw ForbiddenException when non-owner tries to delete project")
-        void shouldThrowException_WhenDeletingAsNonOwner() {
-            when(projectRepository.findById(projectId)).thenReturn(Optional.of(sampleProject));
-            assertThrows(ForbiddenException.class, () -> projectService.deleteProject(projectId, 99L));
+        @DisplayName("Should delete project")
+        void shouldDeleteProject() {
+            projectService.deleteProject(projectId);
+            verify(projectRepository).deleteById(projectId);
         }
     }
 }

@@ -7,12 +7,12 @@ import com.bifee.projectmanagement.shared.DuplicateResourceException;
 import com.bifee.projectmanagement.shared.ForbiddenException;
 import com.bifee.projectmanagement.shared.PasswordMismatchException;
 import com.bifee.projectmanagement.shared.ResourceNotFoundException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
 public class UserService {
@@ -31,47 +31,33 @@ public class UserService {
     }
 
     @Transactional
-    public List<User> getAllUsers(Long requesterId){
-        User requester = getUserById(requesterId);
-        if(!requester.role().equals(UserRole.ADMIN)){
-            throw new ForbiddenException("Only admin can get all users");
-        }
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<User> getAllUsers(){
         return userRepository.findAll();
     }
 
     @Transactional(readOnly = true)
-    public List<User> getActiveUsers(Long requesterId){
-        User requester = getUserById(requesterId);
-        if(!requester.role().equals(UserRole.ADMIN)){
-            throw new ForbiddenException("Only admin can get all users");
-        }
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<User> getActiveUsers(){
         return userRepository.findByIsActiveTrue();
     }
 
     @Transactional
-    public List<User> getUsersByRole(Long requesterId, UserRole role){
-        User requester = getUserById(requesterId);
-        if(!requester.role().equals(UserRole.ADMIN)){
-            throw new ForbiddenException("Only admin can get all users");
-        }
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<User> getUsersByRole(UserRole role){
         return userRepository.findByRole(role);
 
     }
 
     @Transactional
-    public List<User> getUsersByName(Long requesterId, String name){
-        User requester = getUserById(requesterId);
-        if(!requester.role().equals(UserRole.ADMIN)){
-            throw new ForbiddenException("Only admin can get all users");
-        }
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<User> getUsersByName(String name){
         return userRepository.findByName(name);
     }
 
     @Transactional
-    public User updateProfile(Long userId, UpdateUserProfileRequest request, Long requesterId){
-        if(!requesterId.equals(userId)){
-            throw new ForbiddenException("Only user can update his profile");
-        }
+    @PreAuthorize("hasRole('ADMIN') or #userId == principal.user.id")
+    public User updateProfile(Long userId, UpdateUserProfileRequest request){
         User user = getUserById(userId);
         User.Builder builder = user.mutate();
         if (request.name() != null) {
@@ -87,11 +73,8 @@ public class UserService {
     }
 
     @Transactional
-    public void updatePassword(Long userId, UpdatePasswordRequest request, Long requesterId){
-        if(!userId.equals(requesterId)){
-            throw new ForbiddenException("Only user can update his password");
-        }
-
+    @PreAuthorize("#userId == principal.user.id")
+    public void updatePassword(Long userId, UpdatePasswordRequest request){
         if(!request.newPasswordsMatch()){
             throw new PasswordMismatchException("Passwords do not match");
         }
@@ -112,25 +95,16 @@ public class UserService {
     }
 
     @Transactional
-    public User updateUserRole(Long userId, UserRole newRole, Long adminId){
-        User admin = getUserById(adminId);
+    @PreAuthorize("hasRole('ADMIN') and #userId != principal.user.id")
+    public User updateUserRole(Long userId, UserRole newRole){
         User user = getUserById(userId);
-        if(admin.role() != UserRole.ADMIN){
-            throw new ForbiddenException("Only admin can change roles");
-        }
-        if(adminId.equals(userId)){
-            throw new ForbiddenException("Admin cannot be update own role");
-        }
         User updatedUser = user.mutate().withRole(newRole).build();
         return userRepository.save(updatedUser);
     }
 
     @Transactional
-    public User activateUser(Long userId, Long adminId) {
-        User admin = getUserById(adminId);
-        if (!admin.isAdmin()) {
-            throw new ForbiddenException("Only admins can activate users");
-        }
+    @PreAuthorize("hasRole('ADMIN')")
+    public User activateUser(Long userId) {
         User user = getUserById(userId);
         if (user.isActive()) {
             throw new ForbiddenException("User is already active");
@@ -142,20 +116,9 @@ public class UserService {
     }
 
     @Transactional
-    public User deactivateUser(Long userId, Long requesterId) {
-        User requester = getUserById(requesterId);
+    @PreAuthorize("hasRole('ADMIN') or #userId == principal.user.id")
+    public User deactivateUser(Long userId) {
         User user = getUserById(userId);
-
-        boolean isAdmin = requester.isAdmin();
-        boolean isOwner = userId.equals(requesterId);
-
-        if (!isAdmin && !isOwner) {
-            throw new ForbiddenException("Only admins or the user can deactivate the account");
-        }
-
-        if (isAdmin && isOwner) {
-            throw new ForbiddenException("Admins cannot deactivate their own account");
-        }
 
         if (!user.isActive()) {
             throw new ForbiddenException("User is already inactive");
@@ -169,17 +132,8 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteUser(Long userId, Long adminId) {
-        User admin = getUserById(adminId);
-
-        if (!admin.isAdmin()) {
-            throw new ForbiddenException("Only admins can permanently delete users");
-        }
-
-        if (userId.equals(adminId)) {
-            throw new ForbiddenException("Admins cannot delete themselves");
-        }
-
+    @PreAuthorize("hasRole('ADMIN') and #userId != principal.user.id")
+    public void deleteUser(Long userId) {
         userRepository.deleteById(userId);
     }
 

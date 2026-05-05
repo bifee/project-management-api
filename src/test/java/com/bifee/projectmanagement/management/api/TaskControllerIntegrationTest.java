@@ -9,7 +9,6 @@ import com.bifee.projectmanagement.management.domain.task.TaskPriority;
 import com.bifee.projectmanagement.management.domain.task.TaskStatus;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.Collections;
 
@@ -31,7 +30,7 @@ class TaskControllerIntegrationTest extends BaseControllerTest {
                 .content(objectMapper.writeValueAsString(projectRequest)))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
-        Long projectId = objectMapper.readTree(projectBody).get("id").asLong();
+        long projectId = objectMapper.readTree(projectBody).get("id").asLong();
 
         // 2. Create a task
         CreateTaskRequest taskRequest = new CreateTaskRequest("New Task", "Task Desc", TaskStatus.TO_DO, TaskPriority.HIGH, Collections.emptySet());
@@ -41,7 +40,7 @@ class TaskControllerIntegrationTest extends BaseControllerTest {
                 .content(objectMapper.writeValueAsString(taskRequest)))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
-        Long taskId = objectMapper.readTree(taskBody).get("id").asLong();
+        long taskId = objectMapper.readTree(taskBody).get("id").asLong();
 
         // 3. Get task by ID
         mockMvc.perform(get("/api/tasks/" + taskId)
@@ -69,7 +68,7 @@ class TaskControllerIntegrationTest extends BaseControllerTest {
                 .andReturn().getResponse().getContentAsString();
         
         // TaskController#addCommentToTask returns TaskResponse. 
-        // Let's assume TaskResponse has a list of comments or we can fetch them separately.
+        // Let's assume TaskResponse has a list of comments, or we can fetch them separately.
         
         // 6. Get comments
         mockMvc.perform(get("/api/tasks/" + taskId + "/comments")
@@ -88,7 +87,7 @@ class TaskControllerIntegrationTest extends BaseControllerTest {
         String commentsBody = mockMvc.perform(get("/api/tasks/" + taskId + "/comments")
                 .header("Authorization", "Bearer " + token))
                 .andReturn().getResponse().getContentAsString();
-        Long commentId = objectMapper.readTree(commentsBody).get(0).get("id").asLong();
+        long commentId = objectMapper.readTree(commentsBody).get(0).get("id").asLong();
 
         mockMvc.perform(get("/api/tasks/" + taskId + "/comments/" + commentId)
                 .header("Authorization", "Bearer " + token))

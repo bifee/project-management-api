@@ -9,6 +9,7 @@ import com.bifee.projectmanagement.management.domain.task.Task;
 import com.bifee.projectmanagement.management.domain.task.TaskRepository;
 import com.bifee.projectmanagement.shared.ForbiddenException;
 import com.bifee.projectmanagement.shared.ResourceNotFoundException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,14 +41,12 @@ public class TaskService {
     }
 
     @Transactional
-    public Task createTask(Long ProjectId, CreateTaskRequest request, Long creatorId){
-        Project project = projectService.getProjectById(ProjectId);
-        if(!project.isMember(creatorId)){
-            throw new ForbiddenException("User is not member of project");
-        }
+    @PreAuthorize("@projectSecurity.isMember(#projectId, principal)")
+    public Task createTask(Long projectId, CreateTaskRequest request){
         Task task = new Task.Builder().withTitle(request.title())
                 .withDescription(request.description())
-                .withProject(ProjectId)
+                .withProject(projectId)
+                .withStatus(request.status())
                 .withPriority(request.priority())
                 .withAssignedUser(request.assignedUsersId())
                 .build();
@@ -55,12 +54,9 @@ public class TaskService {
     }
 
     @Transactional
-    public Task updateTask(Long taskId, UpdateTaskRequest request, Long requesterId){
+    @PreAuthorize("@taskSecurity.canManageTask(#taskId, principal)")
+    public Task updateTask(Long taskId, UpdateTaskRequest request){
         Task task = getTaskById(taskId);
-        Project project = projectService.getProjectById(task.projectId());
-        if(!project.isMember(requesterId)){
-            throw new ForbiddenException("User is not member of project");
-        }
         Task.Builder builder = task.mutate();
 
         if(request.title() != null) builder.withTitle(request.title());
@@ -73,23 +69,17 @@ public class TaskService {
     }
 
     @Transactional
-    public void deleteTask(Long id, Long requesterId){
-        Task task = getTaskById(id);
-        Project project = projectService.getProjectById(task.projectId());
-        if(!project.isMember(requesterId)){
-            throw new ForbiddenException("User is not member of project");
-        }
+    @PreAuthorize("@taskSecurity.canManageTask(#id, principal)")
+    public void deleteTask(Long id){
         taskRepository.deleteById(id);
     }
 
 
     @Transactional
+    @PreAuthorize("@taskSecurity.canManageTask(#taskId, principal)")
     public Task addComment(Long taskId, CommentRequest request, Long requesterId){
         Task task = getTaskById(taskId);
-        Project project = projectService.getProjectById(task.projectId());
-        if (!project.isMember(requesterId)) {
-            throw new ForbiddenException("User is not member of project");
-        }
+        
         Comment comment = new Comment.Builder()
                 .withContent(request.content())
                 .withCreator(requesterId).build();
@@ -102,12 +92,10 @@ public class TaskService {
     }
 
     @Transactional
-    public Task removeComment(Long taskId, Long commentId, Long requesterId){
+    @PreAuthorize("@taskSecurity.canManageTask(#taskId, principal)")
+    public Task removeComment(Long taskId, Long commentId){
         Task task = getTaskById(taskId);
-        Project project = projectService.getProjectById(task.projectId());
-        if (!project.isMember(requesterId)) {
-            throw new ForbiddenException("User is not member of project");
-        }
+        
         List<Comment> comment_list = new ArrayList<>(task.comments());
         boolean removed = comment_list.removeIf(comment -> comment.id().equals(commentId));
         if (!removed){
@@ -118,22 +106,15 @@ public class TaskService {
     }
 
     @Transactional
-    public Task updateComment(Long taskId, Long commentId, CommentRequest request, Long requesterId){
+    @PreAuthorize("@taskSecurity.isCommentCreator(#taskId, #commentId, principal)")
+    public Task updateComment(Long taskId, Long commentId, CommentRequest request){
         Task task = getTaskById(taskId);
-        Project project = projectService.getProjectById(task.projectId());
-        if (!project.isMember(requesterId)) {
-            throw new ForbiddenException("User is not member of project");
-        }
 
         List<Comment> comment_list = new ArrayList<>(task.comments());
 
         Comment founded_comment = comment_list.stream()
                 .filter(comment -> comment.id().equals(commentId))
                 .findFirst().orElseThrow(() -> new ResourceNotFoundException("Comment", commentId));
-
-        if (!founded_comment.creatorId().equals(requesterId)){
-            throw new ForbiddenException("Only comment creator can update comment");
-        }
 
         Comment updatedComment = founded_comment.mutate().withContent(request.content()).build();
         System.out.println(updatedComment);

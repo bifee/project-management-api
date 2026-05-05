@@ -8,6 +8,7 @@ import com.bifee.projectmanagement.management.domain.project.ProjectRepository;
 import com.bifee.projectmanagement.management.domain.project.ProjectStatus;
 import com.bifee.projectmanagement.shared.ForbiddenException;
 import com.bifee.projectmanagement.shared.ResourceNotFoundException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,11 +53,9 @@ public class ProjectService {
     }
 
     @Transactional
-    public Project addMembersToProject(AddMembersRequest request, Long projectId, Long requesterId) {
+    @PreAuthorize("@projectSecurity.isOwner(#projectId, principal)")
+    public Project addMembersToProject(AddMembersRequest request, Long projectId) {
         Project project = getProjectById(projectId);
-        if(!project.isOwner(requesterId)){
-            throw new ForbiddenException("Only owner can add members to project");
-        }
 
         Set<Long> alreadyMembers = request.userIds().stream()
                 .filter(project::isMember)
@@ -76,11 +75,10 @@ public class ProjectService {
     }
 
     @Transactional
-    public Project removeMemberFromProject(Long memberId, Long projectId, Long requesterId) {
+    @PreAuthorize("@projectSecurity.isOwner(#projectId, principal)")
+    public Project removeMemberFromProject(Long memberId, Long projectId) {
         Project project = getProjectById(projectId);
-        if(!project.isOwner(requesterId)){
-            throw new ForbiddenException("Only owner can remove members from project");
-        }
+        
         if (!project.isMember(memberId)) {
             throw new ForbiddenException("Member not in project");
         }
@@ -97,11 +95,10 @@ public class ProjectService {
     }
 
     @Transactional
-    public Project updateProject(Long ProjectId, UpdateProjectRequest dto, Long requesterId) {
-        Project project = getProjectById(ProjectId);
-        if (!project.isOwner(requesterId)) {
-            throw new ForbiddenException("Only owner can update project");
-        }
+    @PreAuthorize("@projectSecurity.isOwner(#projectId, principal)")
+    public Project updateProject(Long projectId, UpdateProjectRequest dto) {
+        Project project = getProjectById(projectId);
+        
         Project.Builder builder = project.mutate();
         if(dto.title() != null){
             builder.withTitle(dto.title());
@@ -116,11 +113,8 @@ public class ProjectService {
     }
 
     @Transactional
-    public void deleteProject(Long id, Long requesterId) {
-        Project project = getProjectById(id);
-        if(!project.isOwner(requesterId)){
-            throw new ForbiddenException("Only owner can delete project");
-        }
+    @PreAuthorize("@projectSecurity.isOwner(#id, principal)")
+    public void deleteProject(Long id) {
         projectRepository.deleteById(id);
     }
 

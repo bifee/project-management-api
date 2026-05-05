@@ -2,10 +2,10 @@ package com.bifee.projectmanagement.management.application;
 
 import com.bifee.projectmanagement.management.application.dto.task.CreateTaskRequest;
 import com.bifee.projectmanagement.management.application.dto.task.UpdateTaskRequest;
-import com.bifee.projectmanagement.management.domain.project.Project;
-import com.bifee.projectmanagement.management.domain.task.*;
-import com.bifee.projectmanagement.shared.ForbiddenException;
-import com.bifee.projectmanagement.shared.ResourceNotFoundException;
+import com.bifee.projectmanagement.management.domain.task.Task;
+import com.bifee.projectmanagement.management.domain.task.TaskPriority;
+import com.bifee.projectmanagement.management.domain.task.TaskRepository;
+import com.bifee.projectmanagement.management.domain.task.TaskStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -36,100 +36,79 @@ class TaskServiceTest {
     @InjectMocks
     private TaskService taskService;
 
-    private Project project;
-    private Task task;
+    private final Long projectId = 1L;
+    private final Long taskId = 100L;
+    private Task sampleTask;
 
     @BeforeEach
     void setUp() {
-        project = new Project.Builder()
-                .withId(1L)
-                .withTitle("Project Test")
-                .withOwnerId(10L)
-                .withMembersIds(Set.of(10L, 20L))
-                .build();
+        Long memberId = 10L;
 
-        task = new Task.Builder()
-                .withId(100L)
-                .withTitle("Initial Task")
-                .withProject(1L)
+
+        sampleTask = new Task.Builder()
+                .withId(taskId)
+                .withTitle("Task")
+                .withProject(projectId)
                 .build();
+    }
+
+    @Nested
+    @DisplayName("Scenario: Task Retrieval")
+    class RetrievalTests {
+        @Test
+        @DisplayName("Should return task by ID")
+        void shouldReturnTaskById() {
+            when(taskRepository.findById(taskId)).thenReturn(Optional.of(sampleTask));
+
+            Task result = taskService.getTaskById(taskId);
+
+            assertNotNull(result);
+            assertEquals("Task", result.title());
+        }
+
+        @Test
+        @DisplayName("Should return tasks by project ID")
+        void shouldReturnTasksByProjectId() {
+            when(taskRepository.findByProjectId(projectId)).thenReturn(List.of(sampleTask));
+
+            List<Task> result = taskService.getTasksByProjectId(projectId);
+
+            assertFalse(result.isEmpty());
+            assertEquals(1, result.size());
+        }
     }
 
     @Nested
     @DisplayName("Scenario: Task Creation")
     class CreateTaskTests {
-
         @Test
-        @DisplayName("Should create task successfully when requester is a member")
-        void shouldCreateTask_WhenUserIsMember() {
-            CreateTaskRequest request = new CreateTaskRequest(
-                    "Nova Task", "Desc", TaskStatus.TO_DO, TaskPriority.HIGH, Set.of(20L));
-
-            when(projectService.getProjectById(1L)).thenReturn(project);
+        @DisplayName("Should create task successfully")
+        void shouldCreateTask() {
+            CreateTaskRequest request = new CreateTaskRequest("New Task", "Desc", TaskStatus.TO_DO, TaskPriority.HIGH, Set.of());
             when(taskRepository.save(any(Task.class))).thenAnswer(i -> i.getArguments()[0]);
 
-            Task result = taskService.createTask(1L, request, 20L);
+            Task result = taskService.createTask(projectId, request);
 
             assertNotNull(result);
-            assertEquals("Nova Task", result.title());
-            verify(taskRepository).save(any(Task.class));
-        }
-
-        @Test
-        @DisplayName("Should throw ForbiddenException when creator is NOT a project member")
-        void shouldThrowForbidden_WhenCreatorIsNotMember() {
-            CreateTaskRequest request = new CreateTaskRequest("Erro", "Desc", null, null, null);
-            when(projectService.getProjectById(1L)).thenReturn(project);
-
-            assertThrows(ForbiddenException.class, () ->
-                    taskService.createTask(1L, request, 99L));
-
-            verify(taskRepository, never()).save(any());
-        }
-    }
-
-    @Nested
-    @DisplayName("Scenario: Task Retrieval")
-    class ListTaskTests {
-
-        @Test
-        @DisplayName("Should return list of tasks for a given project")
-        void shouldReturnTasks_WhenProjectHasTasks() {
-            when(taskRepository.findByProjectId(1L)).thenReturn(List.of(task));
-
-            List<Task> result = taskService.getTasksByProjectId(1L);
-
-            assertEquals(1, result.size());
-            assertEquals(100L, result.getFirst().id());
-        }
-
-        @Test
-        @DisplayName("Should throw ResourceNotFoundException when no tasks are found")
-        void shouldThrowException_WhenNoTasksFound() {
-            when(taskRepository.findByProjectId(1L)).thenReturn(List.of());
-
-            assertThrows(ResourceNotFoundException.class, () ->
-                    taskService.getTasksByProjectId(1L));
+            assertEquals("New Task", result.title());
+            verify(taskRepository).save(any());
         }
     }
 
     @Nested
     @DisplayName("Scenario: Comment Management")
     class UpdateTaskTests {
-
         @Test
-        @DisplayName("Should update an existing comment successfully")
-        void shouldUpdateTask_WhenMemberRequests() {
-            UpdateTaskRequest request = new UpdateTaskRequest("New Comment Content", null, null, null, null);
-
-            when(taskRepository.findById(100L)).thenReturn(Optional.of(task));
-            when(projectService.getProjectById(1L)).thenReturn(project);
+        @DisplayName("Should update task successfully")
+        void shouldUpdateTask() {
+            UpdateTaskRequest request = new UpdateTaskRequest("Updated Task", null, null, null, null);
+            when(taskRepository.findById(taskId)).thenReturn(Optional.of(sampleTask));
             when(taskRepository.save(any(Task.class))).thenAnswer(i -> i.getArguments()[0]);
 
-            Task result = taskService.updateTask(100L, request, 10L);
+            Task result = taskService.updateTask(taskId, request);
 
-            assertEquals("New Comment Content", result.title());
-            verify(taskRepository).save(any(Task.class));
+            assertEquals("Updated Task", result.title());
+            verify(taskRepository).save(any());
         }
     }
 }

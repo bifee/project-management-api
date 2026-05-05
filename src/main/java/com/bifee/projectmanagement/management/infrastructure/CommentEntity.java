@@ -2,7 +2,6 @@ package com.bifee.projectmanagement.management.infrastructure;
 
 
 import com.bifee.projectmanagement.management.domain.comment.Comment;
-import com.bifee.projectmanagement.management.domain.task.Task;
 import jakarta.persistence.*;
 
 import java.time.Instant;
@@ -17,7 +16,7 @@ public class CommentEntity {
     private Long creatorId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "task_id", nullable = false, foreignKey = @ForeignKey(
+    @JoinColumn(name = "task_id", foreignKey = @ForeignKey(
             name = "fk_comment_task",
             foreignKeyDefinition = "FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE"
     ))

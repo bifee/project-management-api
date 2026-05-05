@@ -48,10 +48,8 @@ public class TaskController {
     @ApiResponse(responseCode = "400", description = "Invalid input data")
     @ApiResponse(responseCode = "404", description = "Task not found")
     @ApiResponse(responseCode = "500", description = "Server error")
-    public TaskResponse updateTaskById(@PathVariable Long taskId, @RequestBody @Valid UpdateTaskRequest request,
-                                       @AuthenticationPrincipal UserDetailsImpl userDetails){
-        Long requesterId = userDetails.user().id();
-        Task task = taskService.updateTask(taskId, request, requesterId);
+    public TaskResponse updateTaskById(@PathVariable Long taskId, @RequestBody @Valid UpdateTaskRequest request){
+        Task task = taskService.updateTask(taskId, request);
         return TaskResponse.from(task);
     }
 
@@ -63,9 +61,8 @@ public class TaskController {
     @ApiResponse(responseCode = "204", description = "Task deleted successfully")
     @ApiResponse(responseCode = "404", description = "Task not found")
     @ApiResponse(responseCode = "500", description = "Server error")
-    public void deleteTaskById(@PathVariable Long taskId, @AuthenticationPrincipal UserDetailsImpl userDetails){
-        Long requesterId = userDetails.user().id();
-        taskService.deleteTask(taskId, requesterId);
+    public void deleteTaskById(@PathVariable Long taskId){
+        taskService.deleteTask(taskId);
     }
 
     //REQUEST BODY TEM Q SER  OBJ?
@@ -87,9 +84,8 @@ public class TaskController {
     @ApiResponse(responseCode = "204", description = "Comment removed successfully")
     @ApiResponse(responseCode = "404", description = "Task or comment not found")
     @ApiResponse(responseCode = "500", description = "Server error")
-    public TaskResponse removeCommentFromTask(@PathVariable Long taskId, @PathVariable Long commentId, @AuthenticationPrincipal UserDetailsImpl userDetails){
-        Long requesterId = userDetails.user().id();
-        Task task = taskService.removeComment(taskId, commentId, requesterId);
+    public TaskResponse removeCommentFromTask(@PathVariable Long taskId, @PathVariable Long commentId){
+        Task task = taskService.removeComment(taskId, commentId);
         return TaskResponse.from(task);
     }
 
@@ -100,10 +96,8 @@ public class TaskController {
     @ApiResponse(responseCode = "404", description = "Task or comment not found")
     @ApiResponse(responseCode = "500", description = "Server error")
     public TaskResponse updateComment(@PathVariable Long taskId, @PathVariable Long commentId,
-                                      @RequestBody @Valid CommentRequest request,
-                                      @AuthenticationPrincipal UserDetailsImpl userDetails){
-        Long requesterId = userDetails.user().id();
-        Task task = taskService.updateComment(taskId, commentId, request, requesterId);
+                                      @RequestBody @Valid CommentRequest request){
+        Task task = taskService.updateComment(taskId, commentId, request);
         return TaskResponse.from(task);
     }
 

@@ -106,10 +106,8 @@ public class ProjectController {
     @ApiResponse(responseCode = "404", description = "Project not found")
     @ApiResponse(responseCode = "500", description = "Server error")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteProject(@PathVariable Long projectId,
-                              @AuthenticationPrincipal UserDetailsImpl userDetails){
-        Long requesterId = userDetails.user().id();
-        projectService.deleteProject(projectId, requesterId);
+    public void deleteProject(@PathVariable Long projectId){
+        projectService.deleteProject(projectId);
     }
 
     @PatchMapping("/{projectId}")
@@ -119,10 +117,8 @@ public class ProjectController {
     @ApiResponse(responseCode = "404", description = "Project not found")
     @ApiResponse(responseCode = "500", description = "Server error")
     public ProjectResponse updateProject(@PathVariable Long projectId,
-                                         @RequestBody @Valid UpdateProjectRequest dto,
-                                         @AuthenticationPrincipal UserDetailsImpl userDetails){
-        Long requesterId = userDetails.user().id();
-        Project project = projectService.updateProject(projectId, dto, requesterId);
+                                         @RequestBody @Valid UpdateProjectRequest dto){
+        Project project = projectService.updateProject(projectId, dto);
         return ProjectResponse.from(project);
     }
 
@@ -132,9 +128,8 @@ public class ProjectController {
     @ApiResponse(responseCode = "400", description = "Invalid input data")
     @ApiResponse(responseCode = "404", description = "Project or member not found")
     @ApiResponse(responseCode = "500", description = "Server error")
-    public ProjectResponse addMembersToProject(@PathVariable Long projectId, @RequestBody @Valid AddMembersRequest request, @AuthenticationPrincipal UserDetailsImpl userDetails){
-        Long requesterId = userDetails.user().id();
-        Project project = projectService.addMembersToProject(request, projectId, requesterId);
+    public ProjectResponse addMembersToProject(@PathVariable Long projectId, @RequestBody @Valid AddMembersRequest request){
+        Project project = projectService.addMembersToProject(request, projectId);
         return ProjectResponse.from(project);
     }
 
@@ -144,9 +139,8 @@ public class ProjectController {
     @ApiResponse(responseCode = "400", description = "Invalid input data")
     @ApiResponse(responseCode = "404", description = "Project or member not found")
     @ApiResponse(responseCode = "500", description = "Server error")
-    public ProjectResponse removeMemberFromProject(@PathVariable Long projectId, @PathVariable Long memberId, @AuthenticationPrincipal UserDetailsImpl userDetails){
-        Long requesterId = userDetails.user().id();
-        Project project = projectService.removeMemberFromProject(memberId, projectId, requesterId);
+    public ProjectResponse removeMemberFromProject(@PathVariable Long projectId, @PathVariable Long memberId){
+        Project project = projectService.removeMemberFromProject(memberId, projectId);
         return ProjectResponse.from(project);
     }
 
@@ -159,10 +153,8 @@ public class ProjectController {
     @ApiResponse(responseCode = "404", description = "Project not found")
     @ApiResponse(responseCode = "500", description = "Server error")
     public TaskResponse createTask(@PathVariable Long projectId,
-                                   @RequestBody @Valid CreateTaskRequest request,
-                                   @AuthenticationPrincipal UserDetailsImpl userDetails){
-        Long requesterId = userDetails.user().id();
-        Task task = taskService.createTask(projectId, request, requesterId);
+                                   @RequestBody @Valid CreateTaskRequest request){
+        Task task = taskService.createTask(projectId, request);
         return TaskResponse.from(task);
     }
 
