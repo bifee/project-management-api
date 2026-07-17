@@ -35,7 +35,7 @@ The codebase follows a layered architecture with separated responsibilities:
 - **shared/**: reusable cross-cutting utilities (e.g., error responses, shared exceptions)
 
 ### Tech stack
-- **Java 17**
+- **Java 21**
 - **Spring Boot** (Web, Security, Validation, Data JPA)
 - **PostgreSQL** (local runtime via Docker and production)
 - **H2** (tests)
@@ -43,6 +43,10 @@ The codebase follows a layered architecture with separated responsibilities:
 - **Maven**
 
 ### How to run locally
+Prerequisites:
+- **Java 21**
+- **Docker** and **Docker Compose**
+
 1. Start PostgreSQL with Docker Compose:
    ```bash
    docker-compose up -d
@@ -56,7 +60,16 @@ The codebase follows a layered architecture with separated responsibilities:
    mvn spring-boot:run
    ```
 
-The application uses the PostgreSQL connection configured in `src/main/resources/application.properties`.
+The application reads runtime configuration from environment variables with local defaults:
+
+```bash
+DB_URL=jdbc:postgresql://localhost:5432/project_management
+DB_USERNAME=project_user
+DB_PASSWORD=project_pass
+JWT_SECRET=change-me-in-real-environments
+```
+
+If you do not export them, the defaults from `src/main/resources/application.properties` are used.
 
 ### How to run tests
 Tests use the `test` profile with H2 from `src/test/resources/application-test.properties`:
