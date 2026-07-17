@@ -37,18 +37,33 @@ The codebase follows a layered architecture with separated responsibilities:
 ### Tech stack
 - **Java 17**
 - **Spring Boot** (Web, Security, Validation, Data JPA)
-- **PostgreSQL** (production)
-- **H2** (for tests/local usage when applicable)
+- **PostgreSQL** (local runtime via Docker and production)
+- **H2** (tests)
 - **JWT** (Auth0 java-jwt)
 - **Maven**
 
-### How to run (high level)
-1. Configure environment/`application.properties` (DB, JWT secret, etc.)
-2. Start PostgreSQL (locally or using Docker)
-3. Run:
+### How to run locally
+1. Start PostgreSQL with Docker Compose:
+   ```bash
+   docker-compose up -d
+   ```
+2. Confirm the database container is running:
+   ```bash
+   docker ps
+   ```
+3. Run the API:
    ```bash
    mvn spring-boot:run
    ```
+
+The application uses the PostgreSQL connection configured in `src/main/resources/application.properties`.
+
+### How to run tests
+Tests use the `test` profile with H2 from `src/test/resources/application-test.properties`:
+
+```bash
+mvn test
+```
 
 ### Recommended next steps
 - Add **unit tests** (especially for `application` services)
