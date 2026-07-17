@@ -17,8 +17,6 @@ The project is structured to keep the domain model isolated from infrastructure 
 - Task **comments**
 - Context-based authorization rules (e.g., only project members can manage tasks; only the owner can manage members)
 
-> Note: depending on the current state of the repository, some endpoints may still be under development.
-
 ### Core entities
 - **User**
 - **Project**
