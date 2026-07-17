@@ -7,7 +7,10 @@ import jakarta.persistence.*;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Entity
@@ -25,7 +28,7 @@ public class TaskEntity {
     @ElementCollection
     @CollectionTable(name = "task_assigned_users", joinColumns = @JoinColumn(name = "task_id"))
     @Column(name = "user_id")
-    private Set<Long> assignedUsersId;
+    private Set<Long> assignedUsersId = new HashSet<>();
 
     @Column(name = "project_id")
     private Long projectId;
@@ -44,7 +47,7 @@ public class TaskEntity {
         this.description = description;
         this.status = status;
         this.priority = priority;
-        this.assignedUsersId = assignedUsersId;
+        setAssignedUsersId(assignedUsersId);
         this.projectId = projectId;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -58,7 +61,7 @@ public class TaskEntity {
                 .withDescription(taskEntity.description)
                 .withStatus(taskEntity.status)
                 .withPriority(taskEntity.priority)
-                .withAssignedUser(taskEntity.assignedUsersId)
+                .withAssignedUser(new HashSet<>(taskEntity.assignedUsersId))
                 .withProject(taskEntity.projectId)
                 .withCreatedAt(taskEntity.createdAt)
                 .withUpdatedAt(taskEntity.updatedAt)
@@ -93,21 +96,72 @@ public class TaskEntity {
         return taskEntity;
     }
 
+    void updateFrom(Task task) {
+        this.title = task.title();
+        this.description = task.description();
+        this.status = task.status();
+        this.priority = task.priority();
+        this.projectId = task.projectId();
+        this.createdAt = task.createdAt();
+        this.updatedAt = task.updatedAt();
+        setAssignedUsersId(task.assignedUsersId());
+
+        List<CommentEntity> updatedComments = reconcileComments(task.comments());
+        setComments(updatedComments);
+    }
+
 
     private void setComments(List<CommentEntity> comments) {
         if (this.comments == null) {
             this.comments = new ArrayList<>();
         } else {
-            this.comments.clear();
+            new ArrayList<>(this.comments).forEach(this::removeComment);
         }
         if (comments != null) {
             comments.forEach(this::addComment);
         }
     }
 
+    private void setAssignedUsersId(Set<Long> assignedUsersId) {
+        this.assignedUsersId.clear();
+        if (assignedUsersId != null) {
+            this.assignedUsersId.addAll(assignedUsersId);
+        }
+    }
+
     public void addComment(CommentEntity comment) {
         this.comments.add(comment);
         comment.setTask(this);
+    }
+
+    public void removeComment(CommentEntity comment) {
+        this.comments.remove(comment);
+        comment.setTask(null);
+    }
+
+    private List<CommentEntity> reconcileComments(List<com.bifee.projectmanagement.management.domain.comment.Comment> comments) {
+        if (comments == null || comments.isEmpty()) {
+            return List.of();
+        }
+
+        Map<Long, CommentEntity> existingCommentsById = new LinkedHashMap<>();
+        for (CommentEntity existingComment : this.comments) {
+            if (existingComment.getId() != null) {
+                existingCommentsById.put(existingComment.getId(), existingComment);
+            }
+        }
+
+        List<CommentEntity> reconciledComments = new ArrayList<>();
+        for (com.bifee.projectmanagement.management.domain.comment.Comment comment : comments) {
+            CommentEntity existingComment = comment.id() == null ? null : existingCommentsById.get(comment.id());
+            if (existingComment != null) {
+                existingComment.updateFrom(comment);
+                reconciledComments.add(existingComment);
+            } else {
+                reconciledComments.add(CommentEntity.toEntity(comment));
+            }
+        }
+        return reconciledComments;
     }
 
 

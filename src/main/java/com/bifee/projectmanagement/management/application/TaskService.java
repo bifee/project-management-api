@@ -28,7 +28,7 @@ public class TaskService {
 
     @Transactional(readOnly = true)
     public Task getTaskById(Long id){
-        return taskRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Task not found with id: " + id));
+        return taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task", id));
     }
 
     @Transactional
@@ -117,7 +117,6 @@ public class TaskService {
                 .findFirst().orElseThrow(() -> new ResourceNotFoundException("Comment", commentId));
 
         Comment updatedComment = founded_comment.mutate().withContent(request.content()).build();
-        System.out.println(updatedComment);
 
         comment_list.set(comment_list.indexOf(founded_comment), updatedComment);
         Task updatedTask = task.mutate().withComments(comment_list).build();

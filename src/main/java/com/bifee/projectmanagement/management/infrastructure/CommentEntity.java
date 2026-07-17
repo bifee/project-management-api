@@ -49,6 +49,13 @@ public class CommentEntity {
         return new CommentEntity(comment.id(), comment.content() , comment.creatorId(), comment.createdAt(), comment.updatedAt());
     }
 
+    void updateFrom(Comment comment) {
+        this.content = comment.content();
+        this.creatorId = comment.creatorId();
+        this.createdAt = comment.createdAt();
+        this.updatedAt = comment.updatedAt();
+    }
+
     void setTask(TaskEntity task) {
         this.task = task;
     }

@@ -17,8 +17,17 @@ class ProjectRepositoryImpl implements ProjectRepository {
 
     @Override
     public Project save(Project project) {
-        ProjectEntity entity = ProjectEntity.toEntity(project);
-        ProjectEntity savedEntity = jpaProjectRepository.save(entity);
+        ProjectEntity savedEntity;
+
+        if (project.id() == null) {
+            savedEntity = jpaProjectRepository.save(ProjectEntity.toEntity(project));
+        } else {
+            ProjectEntity entity = jpaProjectRepository.findById(project.id())
+                    .orElseGet(() -> ProjectEntity.toEntity(project));
+            entity.updateFrom(project);
+            savedEntity = jpaProjectRepository.save(entity);
+        }
+
         return ProjectEntity.toDomain(savedEntity);
     }
 

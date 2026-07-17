@@ -6,7 +6,7 @@ import com.bifee.projectmanagement.management.domain.project.ProjectStatus;
 import jakarta.persistence.*;
 
 import java.time.Instant;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -26,7 +26,7 @@ public class ProjectEntity {
     @ElementCollection
     @CollectionTable(name = "project_members", joinColumns = @JoinColumn(name = "project_id"))
     @Column(name = "user_id")
-    private Set<Long> membersIds;
+    private Set<Long> membersIds = new HashSet<>();
 
     protected ProjectEntity() {
     }
@@ -39,7 +39,7 @@ public class ProjectEntity {
         this.ownerId = ownerId;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
-        this.membersIds = membersIds;
+        setMembersIds(membersIds);
     }
     
     protected static ProjectEntity toEntity(Project project){
@@ -64,8 +64,25 @@ public class ProjectEntity {
                 .withOwnerId(projectEntity.ownerId)
                 .withCreatedAt(projectEntity.createdAt)
                 .withUpdatedAt(projectEntity.updatedAt)
-                .withMembersIds(projectEntity.membersIds)
+                .withMembersIds(new HashSet<>(projectEntity.membersIds))
                 .build();
+    }
+
+    void updateFrom(Project project) {
+        this.title = project.title();
+        this.description = project.description();
+        this.projectStatus = project.projectStatus();
+        this.ownerId = project.ownerId();
+        this.createdAt = project.createdAt();
+        this.updatedAt = project.updatedAt();
+        setMembersIds(project.membersIds());
+    }
+
+    private void setMembersIds(Set<Long> membersIds) {
+        this.membersIds.clear();
+        if (membersIds != null) {
+            this.membersIds.addAll(membersIds);
+        }
     }
 
     public Long getId() {

@@ -18,8 +18,17 @@ class TaskRepositoryImpl implements TaskRepository {
 
     @Override
     public Task save(Task task) {
-        TaskEntity entity = TaskEntity.toEntity(task);
-        TaskEntity savedEntity = jpaTaskRepository.save(entity);
+        TaskEntity savedEntity;
+
+        if (task.id() == null) {
+            savedEntity = jpaTaskRepository.save(TaskEntity.toEntity(task));
+        } else {
+            TaskEntity entity = jpaTaskRepository.findById(task.id())
+                    .orElseGet(() -> TaskEntity.toEntity(task));
+            entity.updateFrom(task);
+            savedEntity = jpaTaskRepository.save(entity);
+        }
+
         return TaskEntity.toDomain(savedEntity);
     }
 
